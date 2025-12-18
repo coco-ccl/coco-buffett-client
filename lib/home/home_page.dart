@@ -1,6 +1,7 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../game/coco_game.dart';
 import '../game/player_bloc/player_bloc.dart';
 
@@ -40,6 +41,17 @@ class _HomePageState extends State<HomePage> {
         body: Stack(
           children: [
             GameWidget(game: game),
+            // 주식창 버튼
+            Positioned(
+              top: 20,
+              right: 20,
+              child: FloatingActionButton(
+                heroTag: 'stock_button',
+                onPressed: () => context.go('/stock'),
+                backgroundColor: Colors.green,
+                child: const Icon(Icons.show_chart),
+              ),
+            ),
             // 방향 컨트롤 버튼
             Positioned(
               right: 20,
@@ -51,6 +63,7 @@ class _HomePageState extends State<HomePage> {
               left: 20,
               bottom: 20,
               child: FloatingActionButton(
+                heroTag: 'customization_button',
                 onPressed: () => _showCustomizationDialog(context),
                 child: const Icon(Icons.settings),
               ),
