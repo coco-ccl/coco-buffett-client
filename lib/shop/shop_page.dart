@@ -2,6 +2,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import '../asset/asset_bloc/asset_bloc.dart';
 import '../game/player_bloc/player_bloc.dart';
 import '../game/sprite_layers.dart';
 import '../game/sprites/bottom.dart';
@@ -72,21 +74,46 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    final playerBloc = context.read<PlayerBloc>();
-
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5DC), // 베이지 배경
       appBar: AppBar(
-        title: const Row(
-          children: [
-            Text('캐릭터 상점', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-          ],
-        ),
+        title: const Text('캐릭터 상점', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
         backgroundColor: const Color(0xFF4A90E2), // 모던 블루
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => context.pop(),
         ),
+        actions: [
+          // 자산 표시
+          BlocBuilder<AssetBloc, AssetState>(
+            builder: (context, state) {
+              final numberFormat = NumberFormat('#,###');
+              return Container(
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.monetization_on, color: Color(0xFFFFD700), size: 20),
+                    const SizedBox(width: 6),
+                    Text(
+                      '${numberFormat.format(state.data.deposit)} G',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
         elevation: 0,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(50),
@@ -115,75 +142,81 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
           ),
         ),
       ),
-      body: Column(
-        children: [
-          // 캐릭터 미리보기
-          Container(
-            padding: const EdgeInsets.all(16),
-            margin: const EdgeInsets.all(8),
-            child: ClipPath(
-              clipper: PixelClipper(notchSize: 6),
-              child: CustomPaint(
-                painter: PixelBorderPainter(
-                  borderColor: Colors.black,
-                  borderWidth: 3,
-                  notchSize: 6,
-                  has3DEffect: true,
-                ),
-                child: Container(
-                  color: Colors.white,
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      ClipPath(
-                        clipper: PixelClipper(notchSize: 3),
-                        child: CustomPaint(
-                          painter: PixelBorderPainter(
-                            borderColor: Colors.black,
-                            borderWidth: 2,
-                            notchSize: 3,
-                          ),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            color: const Color(0xFF4A90E2),
-                            child: const Text(
-                              '미리보기',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+      body: BlocBuilder<PlayerBloc, PlayerState>(
+        builder: (context, state) {
+          final playerBloc = context.read<PlayerBloc>();
+
+          return Column(
+            children: [
+              // 캐릭터 미리보기
+              Container(
+                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.all(8),
+                child: ClipPath(
+                  clipper: PixelClipper(notchSize: 6),
+                  child: CustomPaint(
+                    painter: PixelBorderPainter(
+                      borderColor: Colors.black,
+                      borderWidth: 3,
+                      notchSize: 6,
+                      has3DEffect: true,
+                    ),
+                    child: Container(
+                      color: Colors.white,
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          ClipPath(
+                            clipper: PixelClipper(notchSize: 3),
+                            child: CustomPaint(
+                              painter: PixelBorderPainter(
+                                borderColor: Colors.black,
+                                borderWidth: 2,
+                                notchSize: 3,
+                              ),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                color: const Color(0xFF4A90E2),
+                                child: const Text(
+                                  '미리보기',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                          const SizedBox(height: 12),
+                          _CharacterPreview(),
+                        ],
                       ),
-                      const SizedBox(height: 12),
-                      _CharacterPreview(),
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
-          // 아이템 그리드
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildItemGrid('얼굴', (item) => playerBloc.add(PlayerEvent.faceChanged(item.id))),
-                _buildItemGrid('헤어', (item) => playerBloc.add(PlayerEvent.hairChanged(item.id))),
-                _buildItemGrid('상의', (item) => playerBloc.add(PlayerEvent.topChanged(item.id))),
-                _buildItemGrid('하의', (item) => playerBloc.add(PlayerEvent.bottomChanged(item.id))),
-                _buildItemGrid('신발', (item) => playerBloc.add(PlayerEvent.shoesChanged(item.id))),
-              ],
-            ),
-          ),
-        ],
+              // 아이템 그리드
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildItemGrid('얼굴', state.data, (item) => playerBloc.add(PlayerEvent.faceChanged(item.id))),
+                    _buildItemGrid('헤어', state.data, (item) => playerBloc.add(PlayerEvent.hairChanged(item.id))),
+                    _buildItemGrid('상의', state.data, (item) => playerBloc.add(PlayerEvent.topChanged(item.id))),
+                    _buildItemGrid('하의', state.data, (item) => playerBloc.add(PlayerEvent.bottomChanged(item.id))),
+                    _buildItemGrid('신발', state.data, (item) => playerBloc.add(PlayerEvent.shoesChanged(item.id))),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildItemGrid(String category, void Function(ShopItem) onSelect) {
+  Widget _buildItemGrid(String category, PlayerData playerData, void Function(ShopItem) onSelect) {
     final items = _shopItems[category] ?? [];
 
     return GridView.builder(
@@ -197,28 +230,47 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
-        return _buildItemCard(item, category, onSelect);
+        return _buildItemCard(item, category, playerData, onSelect);
       },
     );
   }
 
-  Widget _buildItemCard(ShopItem item, String category, void Function(ShopItem) onSelect) {
+  Widget _buildItemCard(ShopItem item, String category, PlayerData playerData, void Function(ShopItem) onSelect) {
+    // 현재 착용 중인 아이템인지 확인
+    bool isEquipped = false;
+    switch (category) {
+      case '얼굴':
+        isEquipped = item.id == playerData.faceId;
+        break;
+      case '헤어':
+        isEquipped = item.id == playerData.hairId;
+        break;
+      case '상의':
+        isEquipped = item.id == playerData.topId;
+        break;
+      case '하의':
+        isEquipped = item.id == playerData.bottomId;
+        break;
+      case '신발':
+        isEquipped = item.id == playerData.shoesId;
+        break;
+    }
+
     return GestureDetector(
       onTap: () {
-        onSelect(item);
-        _showPurchaseSnackBar(item);
+        _handleItemSelect(context, item, onSelect);
       },
       child: ClipPath(
         clipper: PixelClipper(notchSize: 4),
         child: CustomPaint(
           painter: PixelBorderPainter(
-            borderColor: Colors.black,
-            borderWidth: 3,
+            borderColor: isEquipped ? const Color(0xFF4A90E2) : Colors.black,
+            borderWidth: isEquipped ? 4 : 3,
             notchSize: 4,
             has3DEffect: true, // 3D 효과 활성화
           ),
           child: Container(
-            color: Colors.white,
+            color: isEquipped ? const Color(0xFFE6F2FF) : Colors.white,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -260,35 +312,9 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
               ),
             ),
                 const SizedBox(height: 4),
-                // 가격
-                ClipPath(
-                  clipper: PixelClipper(notchSize: 2),
-                  child: CustomPaint(
-                    painter: PixelBorderPainter(
-                      borderColor: Colors.black,
-                      borderWidth: 2,
-                      notchSize: 2,
-                      has3DEffect: true,
-                    ),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      color: item.price == 0 ? const Color(0xFF90EE90) : const Color(0xFFFFD700),
-                      child: Text(
-                        item.price == 0 ? '무료' : '${item.price}G',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                // 착용/구매 버튼
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 12),
-                  child: ClipPath(
+                // 가격 또는 착용 중 표시
+                if (isEquipped)
+                  ClipPath(
                     clipper: PixelClipper(notchSize: 2),
                     child: CustomPaint(
                       painter: PixelBorderPainter(
@@ -297,37 +323,127 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
                         notchSize: 2,
                         has3DEffect: true,
                       ),
-                      child: Material(
-                        color: const Color(0xFF4A90E2),
-                        child: InkWell(
-                          onTap: () {
-                            onSelect(item);
-                            _showPurchaseSnackBar(item);
-                          },
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 6),
-                            child: Text(
-                              item.price == 0 ? '착용' : '구매',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        color: const Color(0xFF90EE90),
+                        child: const Text(
+                          '착용 중',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  ClipPath(
+                    clipper: PixelClipper(notchSize: 2),
+                    child: CustomPaint(
+                      painter: PixelBorderPainter(
+                        borderColor: Colors.black,
+                        borderWidth: 2,
+                        notchSize: 2,
+                        has3DEffect: true,
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        color: item.price == 0 ? const Color(0xFF90EE90) : const Color(0xFFFFD700),
+                        child: Text(
+                          item.price == 0 ? '무료' : '${item.price}G',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 6),
+                // 착용/구매 버튼
+                if (!isEquipped)
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    child: ClipPath(
+                      clipper: PixelClipper(notchSize: 2),
+                      child: CustomPaint(
+                        painter: PixelBorderPainter(
+                          borderColor: Colors.black,
+                          borderWidth: 2,
+                          notchSize: 2,
+                          has3DEffect: true,
+                        ),
+                        child: Material(
+                          color: const Color(0xFF4A90E2),
+                          child: InkWell(
+                            onTap: () {
+                              _handleItemSelect(context, item, onSelect);
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(vertical: 6),
+                              child: Text(
+                                item.price == 0 ? '착용' : '구매',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                              textAlign: TextAlign.center,
                             ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  void _handleItemSelect(BuildContext context, ShopItem item, void Function(ShopItem) onSelect) {
+    final assetBloc = context.read<AssetBloc>();
+
+    // 잔액 확인
+    if (item.price > 0 && assetBloc.state.data.deposit < item.price) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.error, color: Colors.white, size: 20),
+              SizedBox(width: 8),
+              Text(
+                '잔액이 부족합니다!',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // 아이템 착용/구매
+    onSelect(item);
+
+    // 가격이 0이 아닌 경우 자산 차감
+    if (item.price > 0) {
+      assetBloc.add(AssetEvent.itemPurchased(
+        itemName: item.name,
+        price: item.price,
+      ));
+    }
+
+    _showPurchaseSnackBar(item);
   }
 
   void _showPurchaseSnackBar(ShopItem item) {
@@ -338,7 +454,9 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
             const Icon(Icons.check_circle, color: Colors.white, size: 20),
             const SizedBox(width: 8),
             Text(
-              '${item.name}을(를) 착용했습니다!',
+              item.price > 0
+                  ? '${item.name}을(를) 구매했습니다!'
+                  : '${item.name}을(를) 착용했습니다!',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ],
@@ -346,9 +464,9 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
         duration: const Duration(seconds: 1),
         behavior: SnackBarBehavior.floating,
         backgroundColor: const Color(0xFF4A90E2),
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.zero,
-          side: const BorderSide(color: Colors.black, width: 2),
+          side: BorderSide(color: Colors.black, width: 2),
         ),
       ),
     );

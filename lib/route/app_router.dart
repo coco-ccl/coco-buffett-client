@@ -1,3 +1,4 @@
+import 'package:cocobuffett/asset/asset_page.dart';
 import 'package:cocobuffett/home/home_page.dart';
 import 'package:cocobuffett/inventory/inventory_page.dart';
 import 'package:cocobuffett/shop/shop_page.dart';
@@ -32,6 +33,11 @@ class AppRouter {
         path: '/inventory',
         name: 'inventory',
         builder: (context, state) => const InventoryPage(),
+      ),
+      GoRoute(
+        path: '/asset',
+        name: 'asset',
+        builder: (context, state) => const AssetPage(),
       ),
     ],
   );

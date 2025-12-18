@@ -62,6 +62,17 @@ class _HomePageState extends State<HomePage> {
               child: const Icon(Icons.inventory),
             ),
           ),
+          // 자산 버튼
+          Positioned(
+            top: 160,
+            left: 20,
+            child: FloatingActionButton(
+              heroTag: 'asset_button',
+              onPressed: () => context.push('/asset'),
+              backgroundColor: const Color(0xFFE67E22),
+              child: const Icon(Icons.account_balance_wallet),
+            ),
+          ),
           // 주식창 버튼
           Positioned(
             top: 20,
