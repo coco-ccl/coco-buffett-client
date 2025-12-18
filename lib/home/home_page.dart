@@ -41,6 +41,17 @@ class _HomePageState extends State<HomePage> {
         body: Stack(
           children: [
             GameWidget(game: game),
+            // 상점 버튼
+            Positioned(
+              top: 20,
+              left: 20,
+              child: FloatingActionButton(
+                heroTag: 'shop_button',
+                onPressed: () => context.push('/shop'),
+                backgroundColor: Colors.orange,
+                child: const Icon(Icons.shopping_bag),
+              ),
+            ),
             // 주식창 버튼
             Positioned(
               top: 20,
