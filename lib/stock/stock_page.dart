@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../utils/svg_utils.dart';
 import 'stock_bloc/stock_bloc.dart';
 
 class StockPage extends StatefulWidget {
@@ -44,9 +45,11 @@ class _StockPageState extends State<StockPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.show_chart,
-                    size: 100,
+                  // SVG 아이콘 사용 예시
+                  SvgUtils.loadIcon(
+                    'stock_chart.svg',
+                    width: 100,
+                    height: 100,
                     color: Colors.green,
                   ),
                   const SizedBox(height: 20),
@@ -120,7 +123,7 @@ class _StockPageState extends State<StockPage> {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withValues(alpha: 0.2),
             spreadRadius: 1,
             blurRadius: 4,
           ),
