@@ -145,8 +145,8 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
 
     return GridView.builder(
       padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 180, // 아이템 최대 너비
         childAspectRatio: 0.8,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
