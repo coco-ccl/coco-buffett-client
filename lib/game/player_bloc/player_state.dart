@@ -7,7 +7,7 @@ sealed class PlayerState with _$PlayerState {
 
   /// 이동 중
   const factory PlayerState.moving(PlayerData data) = PlayerMoving;
-총 지추
+
   /// 커스터마이징 중
   const factory PlayerState.customizing(PlayerData data) = PlayerCustomizing;
 }
