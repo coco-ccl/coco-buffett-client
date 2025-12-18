@@ -1,4 +1,5 @@
 import 'package:cocobuffett/home/home_page.dart';
+import 'package:cocobuffett/shop/shop_page.dart';
 import 'package:cocobuffett/stock/stock_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -20,6 +21,11 @@ class AppRouter {
         path: '/stock',
         name: 'stock',
         builder: (context, state) => const StockPage(),
+      ),
+      GoRoute(
+        path: '/shop',
+        name: 'shop',
+        builder: (context, state) => const ShopPage(),
       ),
     ],
   );
