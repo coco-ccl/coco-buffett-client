@@ -82,7 +82,7 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
             Text('캐릭터 상점', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
           ],
         ),
-        backgroundColor: const Color(0xFF4169E1), // 로얄 블루
+        backgroundColor: const Color(0xFF4A90E2), // 모던 블루
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => context.pop(),
@@ -145,7 +145,7 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
                           ),
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            color: const Color(0xFF4169E1),
+                            color: const Color(0xFF4A90E2),
                             child: const Text(
                               '미리보기',
                               style: TextStyle(
@@ -298,7 +298,7 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
                         has3DEffect: true,
                       ),
                       child: Material(
-                        color: const Color(0xFF4169E1),
+                        color: const Color(0xFF4A90E2),
                         child: InkWell(
                           onTap: () {
                             onSelect(item);
@@ -345,7 +345,7 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
         ),
         duration: const Duration(seconds: 1),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: const Color(0xFF4169E1),
+        backgroundColor: const Color(0xFF4A90E2),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.zero,
           side: const BorderSide(color: Colors.black, width: 2),
@@ -606,7 +606,7 @@ class _CharacterPreviewState extends State<_CharacterPreview> {
                   )
                 : const Center(
                     child: CircularProgressIndicator(
-                      color: Color(0xFF4169E1),
+                      color: Color(0xFF4A90E2),
                       strokeWidth: 3,
                     ),
                   ),

@@ -47,8 +47,19 @@ class _HomePageState extends State<HomePage> {
             child: FloatingActionButton(
               heroTag: 'shop_button',
               onPressed: () => context.push('/shop'),
-              backgroundColor: const Color(0xFF4169E1),
+              backgroundColor: const Color(0xFF4A90E2),
               child: const Icon(Icons.shopping_bag),
+            ),
+          ),
+          // 인벤토리 버튼
+          Positioned(
+            top: 90,
+            left: 20,
+            child: FloatingActionButton(
+              heroTag: 'inventory_button',
+              onPressed: () => context.push('/inventory'),
+              backgroundColor: const Color(0xFF9B59B6),
+              child: const Icon(Icons.inventory),
             ),
           ),
           // 주식창 버튼
