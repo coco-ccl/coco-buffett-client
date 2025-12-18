@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../utils/svg_utils.dart';
+import '../utils/asset_image_utils.dart';
 import 'stock_bloc/stock_bloc.dart';
 
 class StockPage extends StatefulWidget {
@@ -36,7 +36,7 @@ class _StockPageState extends State<StockPage> {
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () => context.go('/'),
+            onPressed: () => context.pop(),
           ),
         ),
         body: BlocBuilder<StockBloc, StockState>(
@@ -45,8 +45,8 @@ class _StockPageState extends State<StockPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // SVG 아이콘 사용 예시
-                  SvgUtils.loadIcon(
+                  // SVG/PNG 통합 사용 예시
+                  AssetImageUtils.loadIcon(
                     'stock_chart.svg',
                     width: 100,
                     height: 100,

@@ -47,7 +47,7 @@ class _HomePageState extends State<HomePage> {
               right: 20,
               child: FloatingActionButton(
                 heroTag: 'stock_button',
-                onPressed: () => context.go('/stock'),
+                onPressed: () => context.push('/stock'),
                 backgroundColor: Colors.green,
                 child: const Icon(Icons.show_chart),
               ),
