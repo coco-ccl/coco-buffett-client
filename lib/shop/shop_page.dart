@@ -70,56 +70,77 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
     final playerBloc = context.read<PlayerBloc>();
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F5DC), // 베이지 배경
       appBar: AppBar(
         title: const Row(
           children: [
-            Icon(Icons.shopping_bag, color: Colors.white),
+            Icon(Icons.shopping_bag, color: Colors.white, size: 20),
             SizedBox(width: 8),
-            Text('캐릭터 상점'),
+            Text('캐릭터 상점', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ],
         ),
-        backgroundColor: Colors.deepOrange,
+        backgroundColor: const Color(0xFF4169E1), // 로얄 블루
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          indicatorColor: Colors.white,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          tabs: const [
-            Tab(icon: Icon(Icons.face), text: '얼굴'),
-            Tab(icon: Icon(Icons.content_cut), text: '헤어'),
-            Tab(icon: Icon(Icons.checkroom), text: '상의'),
-            Tab(icon: Icon(Icons.accessibility), text: '하의'),
-            Tab(icon: Icon(Icons.sports_soccer), text: '신발'),
-          ],
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(50),
+          child: Container(
+            decoration: const BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: Colors.black, width: 2),
+              ),
+            ),
+            child: TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              indicatorColor: Colors.white,
+              indicatorWeight: 3,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white70,
+              labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              tabs: const [
+                Tab(text: '얼굴'),
+                Tab(text: '헤어'),
+                Tab(text: '상의'),
+                Tab(text: '하의'),
+                Tab(text: '신발'),
+              ],
+            ),
+          ),
         ),
       ),
       body: Column(
         children: [
           // 캐릭터 미리보기
           Container(
-            height: 200,
-            color: Colors.grey.shade100,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: Colors.black, width: 3),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4169E1),
+                    border: Border.all(color: Colors.black, width: 2),
+                  ),
+                  child: const Text(
                     '미리보기',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey,
+                      color: Colors.white,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  _CharacterPreview(),
-                ],
-              ),
+                ),
+                const SizedBox(height: 12),
+                _CharacterPreview(),
+              ],
             ),
           ),
           // 아이템 그리드
@@ -160,82 +181,98 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
   }
 
   Widget _buildItemCard(ShopItem item, void Function(ShopItem) onSelect) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: () {
-          onSelect(item);
-          _showPurchaseSnackBar(item);
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  _getIconForItem(item),
-                  size: 40,
-                  color: Colors.deepOrange,
-                ),
+    return GestureDetector(
+      onTap: () {
+        onSelect(item);
+        _showPurchaseSnackBar(item);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.black, width: 3),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // 아이콘 영역
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE6F2FF),
+                border: Border.all(color: Colors.black, width: 2),
               ),
-              const SizedBox(height: 12),
-              Text(
+              child: Icon(
+                _getIconForItem(item),
+                size: 32,
+                color: const Color(0xFF4169E1),
+              ),
+            ),
+            const SizedBox(height: 8),
+            // 아이템 이름
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
                 item.name,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 13,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
                 textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.monetization_on,
-                    size: 16,
-                    color: item.price == 0 ? Colors.green : Colors.amber,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    item.price == 0 ? '무료' : '${item.price}',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: item.price == 0 ? Colors.green : Colors.grey.shade700,
-                      fontWeight: FontWeight.w600,
+            ),
+            const SizedBox(height: 4),
+            // 가격
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: item.price == 0 ? const Color(0xFF90EE90) : const Color(0xFFFFD700),
+                border: Border.all(color: Colors.black, width: 2),
+              ),
+              child: Text(
+                item.price == 0 ? '무료' : '${item.price}G',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            // 착용/구매 버튼
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF4169E1),
+                border: Border.all(color: Colors.black, width: 2),
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    onSelect(item);
+                    _showPurchaseSnackBar(item);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Text(
+                      item.price == 0 ? '착용' : '구매',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () {
-                  onSelect(item);
-                  _showPurchaseSnackBar(item);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepOrange,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 32),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
                 ),
-                child: Text(item.price == 0 ? '착용' : '구매'),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -259,10 +296,23 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
   void _showPurchaseSnackBar(ShopItem item) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${item.name}을(를) 착용했습니다!'),
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Colors.white, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              '${item.name}을(를) 착용했습니다!',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
         duration: const Duration(seconds: 1),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.deepOrange,
+        backgroundColor: const Color(0xFF4169E1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
+          side: const BorderSide(color: Colors.black, width: 2),
+        ),
       ),
     );
   }
@@ -335,20 +385,10 @@ class _CharacterPreviewState extends State<_CharacterPreview> {
           width: 128,
           height: 128,
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.deepOrange, width: 3),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            color: const Color(0xFFF0F0F0),
+            border: Border.all(color: Colors.black, width: 3),
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(9),
-            child: _currentImage != null || _previousImage != null
+          child: _currentImage != null || _previousImage != null
                 ? Stack(
                     children: [
                       // 이전 이미지를 배경으로 유지하여 깜빡임 방지
@@ -375,11 +415,10 @@ class _CharacterPreviewState extends State<_CharacterPreview> {
                   )
                 : const Center(
                     child: CircularProgressIndicator(
-                      color: Colors.deepOrange,
+                      color: Color(0xFF4169E1),
                       strokeWidth: 3,
                     ),
                   ),
-          ),
         );
       },
     );

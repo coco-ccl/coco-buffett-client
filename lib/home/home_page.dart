@@ -47,7 +47,7 @@ class _HomePageState extends State<HomePage> {
             child: FloatingActionButton(
               heroTag: 'shop_button',
               onPressed: () => context.push('/shop'),
-              backgroundColor: Colors.orange,
+              backgroundColor: const Color(0xFF4169E1),
               child: const Icon(Icons.shopping_bag),
             ),
           ),
