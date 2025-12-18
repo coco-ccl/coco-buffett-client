@@ -180,12 +180,12 @@ class StockBloc extends Bloc<StockEvent, StockState> {
         if (data.activeEvent == null && _random.nextDouble() < 0.15) {
           final availableEvents = stockEvents.where(
             (e) => _random.nextDouble() < e.probability,
-          );
+          ).toList();
 
           if (availableEvents.isNotEmpty) {
-            final selectedEvent = availableEvents.elementAt(
-              _random.nextInt(availableEvents.length),
-            );
+            final selectedEvent = availableEvents[
+              _random.nextInt(availableEvents.length)
+            ];
 
             final duration = selectedEvent.effect.type == EventEffectType.dividend
                 ? 0

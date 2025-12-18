@@ -12,21 +12,12 @@ class StockPage extends StatefulWidget {
 }
 
 class _StockPageState extends State<StockPage> {
-  late final StockBloc _stockBloc;
   final TextEditingController _quantityController = TextEditingController();
   bool _isBuyMode = true;
   bool _showChart = false;
 
   @override
-  void initState() {
-    super.initState();
-    _stockBloc = StockBloc();
-    _stockBloc.add(const StockEvent.started());
-  }
-
-  @override
   void dispose() {
-    _stockBloc.close();
     _quantityController.dispose();
     super.dispose();
   }
@@ -44,80 +35,77 @@ class _StockPageState extends State<StockPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _stockBloc,
-      child: Scaffold(
-        backgroundColor: Colors.grey[50],
-        appBar: AppBar(
-          title: const Text(
-            'Stock Master',
-            style: TextStyle(
-              color: Colors.blue,
-              fontWeight: FontWeight.bold,
-              fontSize: 24,
-            ),
+    return Scaffold(
+      backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        title: const Text(
+          'Stock Master',
+          style: TextStyle(
+            color: Colors.blue,
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
           ),
-          backgroundColor: Colors.white,
-          elevation: 1,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () => context.pop(),
-          ),
-          actions: [
-            BlocBuilder<StockBloc, StockState>(
-              builder: (context, state) {
-                return state.maybeWhen(
-                  data: (data) {
-                    final portfolioValue = data.portfolio.fold<double>(
-                      0,
-                      (sum, item) {
-                        final stock = data.stocks.firstWhere(
-                          (s) => s.symbol == item.symbol,
-                        );
-                        return sum + (stock.price * item.quantity);
-                      },
-                    );
-                    final totalAssets = data.currentBalance + portfolioValue;
+        ),
+        backgroundColor: Colors.white,
+        elevation: 1,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => context.pop(),
+        ),
+        actions: [
+          BlocBuilder<StockBloc, StockState>(
+            builder: (context, state) {
+              return state.maybeWhen(
+                data: (data) {
+                  final portfolioValue = data.portfolio.fold<double>(
+                    0,
+                    (sum, item) {
+                      final stock = data.stocks.firstWhere(
+                        (s) => s.symbol == item.symbol,
+                      );
+                      return sum + (stock.price * item.quantity);
+                    },
+                  );
+                  final totalAssets = data.currentBalance + portfolioValue;
 
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          const Text(
-                            '총 자산',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 16),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        const Text(
+                          '총 자산',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
                           ),
-                          Text(
-                            '₩${_formatPrice(totalAssets)}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
-                            ),
+                        ),
+                        Text(
+                          '₩${_formatPrice(totalAssets)}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
                           ),
-                        ],
-                      ),
-                    );
-                  },
-                  orElse: () => const SizedBox(),
-                );
-              },
-            ),
-          ],
-        ),
-        body: BlocBuilder<StockBloc, StockState>(
-          builder: (context, state) {
-            return state.maybeWhen(
-              data: (data) => _buildMainContent(context, data),
-              orElse: () => const Center(child: CircularProgressIndicator()),
-            );
-          },
-        ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                orElse: () => const SizedBox(),
+              );
+            },
+          ),
+        ],
+      ),
+      body: BlocBuilder<StockBloc, StockState>(
+        builder: (context, state) {
+          return state.maybeWhen(
+            data: (data) => _buildMainContent(context, data),
+            orElse: () => const Center(child: CircularProgressIndicator()),
+          );
+        },
       ),
     );
   }
@@ -386,7 +374,7 @@ class _StockPageState extends State<StockPage> {
 
     return GestureDetector(
       onTap: () {
-        _stockBloc.add(StockEvent.selectStock(stock.symbol));
+        context.read<StockBloc>().add(StockEvent.selectStock(stock.symbol));
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
@@ -787,12 +775,12 @@ class _StockPageState extends State<StockPage> {
               onPressed: quantity > 0
                   ? () {
                       if (_isBuyMode) {
-                        _stockBloc.add(StockEvent.buyStock(
+                        context.read<StockBloc>().add(StockEvent.buyStock(
                           symbol: selectedStock.symbol,
                           quantity: quantity,
                         ));
                       } else {
-                        _stockBloc.add(StockEvent.sellStock(
+                        context.read<StockBloc>().add(StockEvent.sellStock(
                           symbol: selectedStock.symbol,
                           quantity: quantity,
                         ));

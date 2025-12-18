@@ -1,5 +1,6 @@
 import 'package:cocobuffett/app/app_bloc/app_bloc.dart';
 import 'package:cocobuffett/game/player_bloc/player_bloc.dart';
+import 'package:cocobuffett/stock/stock_bloc/stock_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'route/app_router.dart';
@@ -21,6 +22,10 @@ class App extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => PlayerBloc(),
+          lazy: false,
+        ),
+        BlocProvider(
+          create: (context) => StockBloc()..add(const StockEvent.started()),
           lazy: false,
         ),
       ],
