@@ -4,6 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../game/player_bloc/player_bloc.dart';
 import '../game/sprite_layers.dart';
+import '../game/sprites/bottom.dart';
+import '../game/sprites/face.dart';
+import '../game/sprites/hair.dart';
+import '../game/sprites/shoes.dart';
+import '../game/sprites/top.dart';
 
 class ShopPage extends StatefulWidget {
   const ShopPage({super.key});
@@ -74,14 +79,12 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
       appBar: AppBar(
         title: const Row(
           children: [
-            Icon(Icons.shopping_bag, color: Colors.white, size: 20),
-            SizedBox(width: 8),
-            Text('캐릭터 상점', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text('캐릭터 상점', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
           ],
         ),
         backgroundColor: const Color(0xFF4169E1), // 로얄 블루
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => context.pop(),
         ),
         elevation: 0,
@@ -117,30 +120,49 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
           // 캐릭터 미리보기
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: Colors.black, width: 3),
-            ),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF4169E1),
-                    border: Border.all(color: Colors.black, width: 2),
-                  ),
-                  child: const Text(
-                    '미리보기',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+            margin: const EdgeInsets.all(8),
+            child: ClipPath(
+              clipper: PixelClipper(notchSize: 6),
+              child: CustomPaint(
+                painter: PixelBorderPainter(
+                  borderColor: Colors.black,
+                  borderWidth: 3,
+                  notchSize: 6,
+                  has3DEffect: true,
+                ),
+                child: Container(
+                  color: Colors.white,
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      ClipPath(
+                        clipper: PixelClipper(notchSize: 3),
+                        child: CustomPaint(
+                          painter: PixelBorderPainter(
+                            borderColor: Colors.black,
+                            borderWidth: 2,
+                            notchSize: 3,
+                          ),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            color: const Color(0xFF4169E1),
+                            child: const Text(
+                              '미리보기',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _CharacterPreview(),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 12),
-                _CharacterPreview(),
-              ],
+              ),
             ),
           ),
           // 아이템 그리드
@@ -175,39 +197,52 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
-        return _buildItemCard(item, onSelect);
+        return _buildItemCard(item, category, onSelect);
       },
     );
   }
 
-  Widget _buildItemCard(ShopItem item, void Function(ShopItem) onSelect) {
+  Widget _buildItemCard(ShopItem item, String category, void Function(ShopItem) onSelect) {
     return GestureDetector(
       onTap: () {
         onSelect(item);
         _showPurchaseSnackBar(item);
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.black, width: 3),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // 아이콘 영역
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE6F2FF),
-                border: Border.all(color: Colors.black, width: 2),
-              ),
-              child: Icon(
-                _getIconForItem(item),
-                size: 32,
-                color: const Color(0xFF4169E1),
-              ),
-            ),
+      child: ClipPath(
+        clipper: PixelClipper(notchSize: 4),
+        child: CustomPaint(
+          painter: PixelBorderPainter(
+            borderColor: Colors.black,
+            borderWidth: 3,
+            notchSize: 4,
+            has3DEffect: true, // 3D 효과 활성화
+          ),
+          child: Container(
+            color: Colors.white,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // 아이콘 영역
+                ClipPath(
+                  clipper: PixelClipper(notchSize: 3),
+                  child: CustomPaint(
+                    painter: PixelBorderPainter(
+                      borderColor: Colors.black,
+                      borderWidth: 2,
+                      notchSize: 3,
+                      has3DEffect: true,
+                    ),
+                    child: Container(
+                      width: 64,
+                      height: 64,
+                      color: const Color(0xFFE6F2FF),
+                      child: _ItemIconPreview(
+                        item: item,
+                        category: category,
+                      ),
+                    ),
+                  ),
+                ),
             const SizedBox(height: 8),
             // 아이템 이름
             Padding(
@@ -224,73 +259,75 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(height: 4),
-            // 가격
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: item.price == 0 ? const Color(0xFF90EE90) : const Color(0xFFFFD700),
-                border: Border.all(color: Colors.black, width: 2),
-              ),
-              child: Text(
-                item.price == 0 ? '무료' : '${item.price}G',
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-            const SizedBox(height: 6),
-            // 착용/구매 버튼
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF4169E1),
-                border: Border.all(color: Colors.black, width: 2),
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    onSelect(item);
-                    _showPurchaseSnackBar(item);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: Text(
-                      item.price == 0 ? '착용' : '구매',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                const SizedBox(height: 4),
+                // 가격
+                ClipPath(
+                  clipper: PixelClipper(notchSize: 2),
+                  child: CustomPaint(
+                    painter: PixelBorderPainter(
+                      borderColor: Colors.black,
+                      borderWidth: 2,
+                      notchSize: 2,
+                      has3DEffect: true,
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      color: item.price == 0 ? const Color(0xFF90EE90) : const Color(0xFFFFD700),
+                      child: Text(
+                        item.price == 0 ? '무료' : '${item.price}G',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
                       ),
-                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),
-              ),
+                const SizedBox(height: 6),
+                // 착용/구매 버튼
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 12),
+                  child: ClipPath(
+                    clipper: PixelClipper(notchSize: 2),
+                    child: CustomPaint(
+                      painter: PixelBorderPainter(
+                        borderColor: Colors.black,
+                        borderWidth: 2,
+                        notchSize: 2,
+                        has3DEffect: true,
+                      ),
+                      child: Material(
+                        color: const Color(0xFF4169E1),
+                        child: InkWell(
+                          onTap: () {
+                            onSelect(item);
+                            _showPurchaseSnackBar(item);
+                          },
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(vertical: 6),
+                            child: Text(
+                              item.price == 0 ? '착용' : '구매',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
-  }
-
-  IconData _getIconForItem(ShopItem item) {
-    if (item.id.contains('face') || item.id == 'default' || item.id == 'cute' || item.id == 'cool') {
-      return Icons.sentiment_satisfied;
-    } else if (item.id.contains('hair') || item.id.contains('short') || item.id.contains('long') || item.id.contains('pomade') || item.id == 'gray') {
-      return Icons.face_retouching_natural;
-    } else if (item.id.contains('tshirt') || item.id.contains('shirt')) {
-      return Icons.checkroom;
-    } else if (item.id.contains('pants') || item.id.contains('jeans')) {
-      return Icons.accessibility_new;
-    } else if (item.id.contains('shoes') || item.id.contains('sneakers')) {
-      return Icons.sports_soccer;
-    }
-    return Icons.shopping_bag;
   }
 
   void _showPurchaseSnackBar(ShopItem item) {
@@ -328,6 +365,155 @@ class ShopItem {
     required this.name,
     required this.price,
   });
+}
+
+/// 픽셀 스타일 모서리를 만드는 커스텀 클리퍼
+class PixelClipper extends CustomClipper<Path> {
+  final double notchSize;
+
+  PixelClipper({this.notchSize = 4.0});
+
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+
+    // 왼쪽 상단
+    path.moveTo(notchSize, 0);
+    path.lineTo(size.width - notchSize, 0);
+
+    // 오른쪽 상단 노치
+    path.lineTo(size.width - notchSize, notchSize);
+    path.lineTo(size.width, notchSize);
+    path.lineTo(size.width, size.height - notchSize);
+
+    // 오른쪽 하단 노치
+    path.lineTo(size.width - notchSize, size.height - notchSize);
+    path.lineTo(size.width - notchSize, size.height);
+    path.lineTo(notchSize, size.height);
+
+    // 왼쪽 하단 노치
+    path.lineTo(notchSize, size.height - notchSize);
+    path.lineTo(0, size.height - notchSize);
+    path.lineTo(0, notchSize);
+
+    // 왼쪽 상단 노치
+    path.lineTo(notchSize, notchSize);
+    path.lineTo(notchSize, 0);
+
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(PixelClipper oldClipper) => notchSize != oldClipper.notchSize;
+}
+
+/// 픽셀 스타일 테두리를 그리는 페인터
+class PixelBorderPainter extends CustomPainter {
+  final Color borderColor;
+  final double borderWidth;
+  final double notchSize;
+  final bool has3DEffect;
+
+  PixelBorderPainter({
+    required this.borderColor,
+    this.borderWidth = 3.0,
+    this.notchSize = 4.0,
+    this.has3DEffect = false,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = borderColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = borderWidth;
+
+    final path = Path();
+
+    // 왼쪽 상단
+    path.moveTo(notchSize, borderWidth / 2);
+    path.lineTo(size.width - notchSize, borderWidth / 2);
+
+    // 오른쪽 상단 노치
+    path.lineTo(size.width - notchSize, notchSize);
+    path.lineTo(size.width - borderWidth / 2, notchSize);
+    path.lineTo(size.width - borderWidth / 2, size.height - notchSize);
+
+    // 오른쪽 하단 노치
+    path.lineTo(size.width - notchSize, size.height - notchSize);
+    path.lineTo(size.width - notchSize, size.height - borderWidth / 2);
+    path.lineTo(notchSize, size.height - borderWidth / 2);
+
+    // 왼쪽 하단 노치
+    path.lineTo(notchSize, size.height - notchSize);
+    path.lineTo(borderWidth / 2, size.height - notchSize);
+    path.lineTo(borderWidth / 2, notchSize);
+
+    // 왼쪽 상단 노치
+    path.lineTo(notchSize, notchSize);
+    path.lineTo(notchSize, borderWidth / 2);
+
+    canvas.drawPath(path, paint);
+
+    // 3D 베벨 효과 추가 - 영역을 채워서 그리기
+    if (has3DEffect) {
+      final bevelWidth = borderWidth + 2;
+
+      // 밝은 베벨 (왼쪽 + 상단)
+      final highlightPaint = Paint()
+        ..color = Colors.white.withOpacity(0.7)
+        ..style = PaintingStyle.fill;
+
+      // 상단 베벨
+      final topBevel = Path();
+      topBevel.moveTo(notchSize, borderWidth);
+      topBevel.lineTo(size.width - notchSize, borderWidth);
+      topBevel.lineTo(size.width - notchSize - bevelWidth, borderWidth + bevelWidth);
+      topBevel.lineTo(notchSize + bevelWidth, borderWidth + bevelWidth);
+      topBevel.close();
+      canvas.drawPath(topBevel, highlightPaint);
+
+      // 왼쪽 베벨
+      final leftBevel = Path();
+      leftBevel.moveTo(borderWidth, notchSize);
+      leftBevel.lineTo(borderWidth + bevelWidth, notchSize + bevelWidth);
+      leftBevel.lineTo(borderWidth + bevelWidth, size.height - notchSize - bevelWidth);
+      leftBevel.lineTo(borderWidth, size.height - notchSize);
+      leftBevel.close();
+      canvas.drawPath(leftBevel, highlightPaint);
+
+      // 어두운 베벨 (오른쪽 + 하단)
+      final shadowPaint = Paint()
+        ..color = Colors.black.withOpacity(0.4)
+        ..style = PaintingStyle.fill;
+
+      // 하단 베벨
+      final bottomBevel = Path();
+      bottomBevel.moveTo(notchSize + bevelWidth, size.height - borderWidth - bevelWidth);
+      bottomBevel.lineTo(size.width - notchSize - bevelWidth, size.height - borderWidth - bevelWidth);
+      bottomBevel.lineTo(size.width - notchSize, size.height - borderWidth);
+      bottomBevel.lineTo(notchSize, size.height - borderWidth);
+      bottomBevel.close();
+      canvas.drawPath(bottomBevel, shadowPaint);
+
+      // 오른쪽 베벨
+      final rightBevel = Path();
+      rightBevel.moveTo(size.width - borderWidth - bevelWidth, notchSize + bevelWidth);
+      rightBevel.lineTo(size.width - borderWidth, notchSize);
+      rightBevel.lineTo(size.width - borderWidth, size.height - notchSize);
+      rightBevel.lineTo(size.width - borderWidth - bevelWidth, size.height - notchSize - bevelWidth);
+      rightBevel.close();
+      canvas.drawPath(rightBevel, shadowPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(PixelBorderPainter oldDelegate) =>
+      borderColor != oldDelegate.borderColor ||
+      borderWidth != oldDelegate.borderWidth ||
+      notchSize != oldDelegate.notchSize ||
+      has3DEffect != oldDelegate.has3DEffect;
 }
 
 class _CharacterPreview extends StatefulWidget {
@@ -381,14 +567,19 @@ class _CharacterPreviewState extends State<_CharacterPreview> {
           });
         }
 
-        return Container(
-          width: 128,
-          height: 128,
-          decoration: BoxDecoration(
-            color: const Color(0xFFF0F0F0),
-            border: Border.all(color: Colors.black, width: 3),
-          ),
-          child: _currentImage != null || _previousImage != null
+        return ClipPath(
+          clipper: PixelClipper(notchSize: 4),
+          child: CustomPaint(
+            painter: PixelBorderPainter(
+              borderColor: Colors.black,
+              borderWidth: 3,
+              notchSize: 4,
+            ),
+            child: Container(
+              width: 128,
+              height: 128,
+              color: const Color(0xFFF0F0F0),
+              child: _currentImage != null || _previousImage != null
                 ? Stack(
                     children: [
                       // 이전 이미지를 배경으로 유지하여 깜빡임 방지
@@ -419,6 +610,8 @@ class _CharacterPreviewState extends State<_CharacterPreview> {
                       strokeWidth: 3,
                     ),
                   ),
+            ),
+          ),
         );
       },
     );
@@ -525,5 +718,137 @@ class _CharacterPainter extends CustomPainter {
   @override
   bool shouldRepaint(_CharacterPainter oldDelegate) {
     return oldDelegate.image != image;
+  }
+}
+
+/// 아이템 아이콘 미리보기 - 실제 도트 그래픽 표시
+class _ItemIconPreview extends StatefulWidget {
+  final ShopItem item;
+  final String category;
+
+  const _ItemIconPreview({
+    required this.item,
+    required this.category,
+  });
+
+  @override
+  State<_ItemIconPreview> createState() => _ItemIconPreviewState();
+}
+
+class _ItemIconPreviewState extends State<_ItemIconPreview> {
+  ui.Image? _cachedImage;
+  String? _lastItemId;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadItemImage();
+  }
+
+  @override
+  void didUpdateWidget(_ItemIconPreview oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.item.id != widget.item.id) {
+      _loadItemImage();
+    }
+  }
+
+  Future<void> _loadItemImage() async {
+    if (_lastItemId == widget.item.id && _cachedImage != null) {
+      return; // 이미 로드된 이미지
+    }
+
+    _lastItemId = widget.item.id;
+
+    try {
+      final image = await _generateSinglePartImage(
+        category: widget.category,
+        itemId: widget.item.id,
+      );
+
+      if (mounted) {
+        setState(() {
+          _cachedImage?.dispose();
+          _cachedImage = image;
+        });
+      }
+    } catch (e) {
+      debugPrint('Failed to load item icon: $e');
+    }
+  }
+
+  // 카테고리별 단일 파트 이미지 생성
+  Future<ui.Image> _generateSinglePartImage({
+    required String category,
+    required String itemId,
+  }) async {
+    List<List<Color>> pixels;
+
+    switch (category) {
+      case '얼굴':
+        pixels = FaceSprites.getPixels(Direction.down, itemId);
+        break;
+      case '헤어':
+        pixels = HairSprites.getPixels(Direction.down, itemId);
+        break;
+      case '상의':
+        pixels = TopSprites.getPixels(Direction.down, itemId);
+        break;
+      case '하의':
+        pixels = BottomSprites.getPixels(Direction.down, itemId);
+        break;
+      case '신발':
+        pixels = ShoesSprites.getPixels(Direction.down, itemId);
+        break;
+      default:
+        throw Exception('Unknown category: $category');
+    }
+
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+    // 픽셀 그리기
+    for (int y = 0; y < 32; y++) {
+      for (int x = 0; x < 32; x++) {
+        final color = pixels[y][x];
+        if (color.alpha > 0) {
+          final paint = Paint()..color = color;
+          canvas.drawRect(
+            Rect.fromLTWH(x.toDouble(), y.toDouble(), 1, 1),
+            paint,
+          );
+        }
+      }
+    }
+
+    final picture = recorder.endRecording();
+    return await picture.toImage(32, 32);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_cachedImage == null) {
+      return const Center(
+        child: SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: Color(0xFF4169E1),
+          ),
+        ),
+      );
+    }
+
+    return CustomPaint(
+      size: const Size(64, 64),
+      painter: _CharacterPainter(_cachedImage!),
+    );
+  }
+
+  @override
+  void dispose() {
+    _cachedImage?.dispose();
+    super.dispose();
   }
 }
