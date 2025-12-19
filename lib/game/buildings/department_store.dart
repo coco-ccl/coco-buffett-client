@@ -4,6 +4,7 @@ import 'package:flame/collisions.dart';
 import 'package:flutter/material.dart';
 import 'building.dart';
 
+/// 백화점 색상 조합 데이터 클래스
 class DepartmentColorSet {
   final Color stoneBase;
   final Color stoneLit;
@@ -20,6 +21,7 @@ class DepartmentColorSet {
   });
 }
 
+/// 백화점 색상 프리셋
 class DepartmentColorPresets {
   static const DepartmentColorSet classicShinsegae = DepartmentColorSet(
     stoneBase: Color(0xFF9E9481),
@@ -28,8 +30,17 @@ class DepartmentColorPresets {
     roofBorder: Color(0xFFD4AF37),
     outline: Color(0xFF2D2418),
   );
+
+  static const DepartmentColorSet modernWhite = DepartmentColorSet(
+    stoneBase: Color(0xFFB0BEC5),
+    stoneLit: Color(0xFFECEFF1),
+    windowLit: Color(0xFF81D4FA),
+    roofBorder: Color(0xFF263238),
+    outline: Color(0xFF212121),
+  );
 }
 
+/// 하이엔드 럭셔리 백화점 (신세계 본점 스타일)
 class DepartmentStore extends Building {
   final DepartmentColorSet colorSet;
   static const double pSize = 2.0;
@@ -77,10 +88,10 @@ class DepartmentStore extends Building {
     canvas.drawRect(rect, facadePaint);
 
     final sideW = pSize * 6 * buildingScale;
-    final sidePaint = Paint()..color = colorSet.outline.withOpacity(0.4);
+    final sidePaint = Paint()..color = colorSet.outline.withValues(alpha: 0.4);
     canvas.drawRect(Rect.fromLTWH(size.x, pSize * 4 * buildingScale, sideW, size.y - pSize * 4 * buildingScale), sidePaint);
     
-    final linePaint = Paint()..color = colorSet.outline.withOpacity(0.1);
+    final linePaint = Paint()..color = colorSet.outline.withValues(alpha: 0.1);
     for (double y = pSize * 25 * buildingScale; y < size.y - pSize * 10 * buildingScale; y += pSize * 18 * buildingScale) {
       canvas.drawLine(Offset(0, y), Offset(size.x, y), linePaint);
     }
@@ -94,7 +105,7 @@ class DepartmentStore extends Building {
     void drawWindowGroup(double startX, double y) {
       for (int i = 0; i < 3; i++) {
         final x = startX + (i * (winW + pSize * 2 * buildingScale));
-        canvas.drawRect(Rect.fromLTWH(x + 1, y + 1, winW, winH), Paint()..color = colorSet.outline.withOpacity(0.5));
+        canvas.drawRect(Rect.fromLTWH(x + 1, y + 1, winW, winH), Paint()..color = colorSet.outline.withValues(alpha: 0.5));
         canvas.drawRect(Rect.fromLTWH(x, y, winW, winH), Paint()..color = colorSet.windowLit);
         canvas.drawRect(Rect.fromLTWH(x + winW/2 - 0.5, y, 1, winH), Paint()..color = colorSet.stoneBase);
       }
@@ -113,7 +124,7 @@ class DepartmentStore extends Building {
     final featureW = size.x * 0.3;
     final featureRect = Rect.fromLTWH(centerX - featureW / 2, pSize * 15 * buildingScale, featureW, size.y - pSize * 15 * buildingScale);
 
-    canvas.drawRect(featureRect.translate(pSize, 0), Paint()..color = colorSet.outline.withOpacity(0.2));
+    canvas.drawRect(featureRect.translate(pSize, 0), Paint()..color = colorSet.outline.withValues(alpha: 0.2));
     canvas.drawRect(featureRect, Paint()..color = colorSet.stoneLit);
 
     final balconyY = pSize * 42 * buildingScale;
@@ -148,7 +159,7 @@ class DepartmentStore extends Building {
     
     final glowPaint = Paint()
       ..shader = RadialGradient(
-        colors: [colorSet.roofBorder.withOpacity(0.15), Colors.transparent],
+        colors: [colorSet.roofBorder.withValues(alpha: 0.15), Colors.transparent],
       ).createShader(Rect.fromLTWH(0, 0, size.x, size.y * 0.3));
     canvas.drawRect(Rect.fromLTWH(0, 0, size.x, size.y * 0.3), glowPaint);
   }

@@ -36,27 +36,27 @@ class RoadLayer extends PositionComponent with HasGameReference {
 
     switch (style) {
       case RoadTileStyle.asphalt:
-        paint.color = const Color(0xFF1C1C1E).withOpacity(brightness);
+        paint.color = const Color(0xFF1C1C1E).withValues(alpha: brightness);
         canvas.drawRect(rect, paint);
-        paint.color = Colors.white.withOpacity(0.03 * brightness);
+        paint.color = Colors.white.withValues(alpha: 0.03 * brightness);
         canvas.drawRect(Rect.fromLTWH(x + 4, y + 8, 2, 2), paint);
         canvas.drawRect(Rect.fromLTWH(x + 22, y + 18, 2, 2), paint);
         break;
 
       case RoadTileStyle.sidewalk:
-        paint.color = const Color(0xFF2C2C2E).withOpacity(brightness);
+        paint.color = const Color(0xFF2C2C2E).withValues(alpha: brightness);
         canvas.drawRect(rect, paint);
-        paint.color = Colors.black.withOpacity(0.4 * brightness);
+        paint.color = Colors.black.withValues(alpha: 0.4 * brightness);
         canvas.drawRect(Rect.fromLTWH(x, y, tileSize, 1), paint);
         canvas.drawRect(Rect.fromLTWH(x, y, 1, tileSize), paint);
-        paint.color = Colors.white.withOpacity(0.05 * brightness);
+        paint.color = Colors.white.withValues(alpha: 0.05 * brightness);
         canvas.drawRect(Rect.fromLTWH(x, y + tileSize - 1, tileSize, 1), paint);
         break;
 
       case RoadTileStyle.marble:
-        paint.color = const Color(0xFF37474F).withOpacity(brightness);
+        paint.color = const Color(0xFF37474F).withValues(alpha: brightness);
         canvas.drawRect(rect, paint);
-        paint.color = Colors.white.withOpacity(0.05 * brightness);
+        paint.color = Colors.white.withValues(alpha: 0.05 * brightness);
         canvas.drawLine(Offset(x, y), Offset(x + tileSize, y + tileSize), paint);
         break;
     }

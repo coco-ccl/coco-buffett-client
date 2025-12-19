@@ -48,7 +48,7 @@ class CelestialBody extends PositionComponent with HasGameReference {
     canvas.drawCircle(
       Offset(x, y), 
       50, 
-      Paint()..color = Colors.orange.withOpacity(0.2)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15)
+      Paint()..color = Colors.orange.withValues(alpha: 0.2)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15)
     );
   }
 
@@ -60,14 +60,14 @@ class CelestialBody extends PositionComponent with HasGameReference {
     canvas.drawCircle(
       Offset(x - 5, y + 5), 
       5, 
-      Paint()..color = Colors.black.withOpacity(0.05)
+      Paint()..color = Colors.black.withValues(alpha: 0.05)
     );
 
     // 달 광채
     canvas.drawCircle(
       Offset(x, y), 
       40, 
-      Paint()..color = Colors.white.withOpacity(0.1)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10)
+      Paint()..color = Colors.white.withValues(alpha: 0.1)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10)
     );
   }
 }

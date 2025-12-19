@@ -92,10 +92,10 @@ class HotelBuilding extends Building {
     for (double y = pSize * 15 * buildingScale; y < size.y - (pSize * 25 * buildingScale); y += gapY + winH) {
       for (double x = pSize * 8 * buildingScale; x < size.x - (pSize * 20 * buildingScale); x += gapX + winW) {
         if (_random.nextDouble() > 0.3) {
-          canvas.drawRect(Rect.fromLTWH(x, y, winW, winH), Paint()..color = colorSet.windowOn.withOpacity(0.8));
-          canvas.drawRect(Rect.fromLTWH(x + winW/2, y, 1 * buildingScale, winH), Paint()..color = Colors.black.withOpacity(0.1));
+          canvas.drawRect(Rect.fromLTWH(x, y, winW, winH), Paint()..color = colorSet.windowOn.withValues(alpha: 0.8));
+          canvas.drawRect(Rect.fromLTWH(x + winW/2, y, 1 * buildingScale, winH), Paint()..color = Colors.black.withValues(alpha: 0.1));
         } else {
-          canvas.drawRect(Rect.fromLTWH(x, y, winW, winH), Paint()..color = Colors.black.withOpacity(0.4));
+          canvas.drawRect(Rect.fromLTWH(x, y, winW, winH), Paint()..color = Colors.black.withValues(alpha: 0.4));
         }
       }
     }
@@ -116,7 +116,7 @@ class HotelBuilding extends Building {
       Offset(signX + signW/2, signY + signH/2), 
       signH/2, 
       Paint()
-        ..color = colorSet.neon.withOpacity(0.1)
+        ..color = colorSet.neon.withValues(alpha: 0.1)
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, 8 * buildingScale)
     );
   }

@@ -452,7 +452,7 @@ class _PixelBorderPainter extends CustomPainter {
       final bevelWidth = borderWidth + 2;
 
       final highlightPaint = Paint()
-        ..color = Colors.white.withOpacity(0.7)
+        ..color = Colors.white.withValues(alpha: 0.7)
         ..style = PaintingStyle.fill;
 
       final topBevel = Path();
@@ -472,7 +472,7 @@ class _PixelBorderPainter extends CustomPainter {
       canvas.drawPath(leftBevel, highlightPaint);
 
       final shadowPaint = Paint()
-        ..color = Colors.black.withOpacity(0.4)
+        ..color = Colors.black.withValues(alpha: 0.4)
         ..style = PaintingStyle.fill;
 
       final bottomBevel = Path();

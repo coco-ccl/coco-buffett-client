@@ -123,7 +123,7 @@ class ApartmentBuilding extends Building {
       
       canvas.drawRect(
         Rect.fromLTWH(x + pSize, y + pSize, fixedWinW, fixedWinH), 
-        Paint()..color = winColor.withOpacity(0.8)
+        Paint()..color = winColor.withValues(alpha: 0.8)
       );
     }
 

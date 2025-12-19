@@ -37,14 +37,14 @@ class PixelClouds extends Component with HasGameReference {
     Color shadowColor;
 
     if (hour >= 7 && hour < 17) { // 낮
-      mainColor = Colors.white.withOpacity(0.7);
-      shadowColor = const Color(0xFFB0BEC5).withOpacity(0.5);
+      mainColor = Colors.white.withValues(alpha: 0.7);
+      shadowColor = const Color(0xFFB0BEC5).withValues(alpha: 0.5);
     } else if (hour >= 17 && hour < 19) { // 노을
-      mainColor = Colors.orangeAccent.withOpacity(0.7);
-      shadowColor = Colors.deepOrange.withOpacity(0.5);
+      mainColor = Colors.orangeAccent.withValues(alpha: 0.7);
+      shadowColor = Colors.deepOrange.withValues(alpha: 0.5);
     } else { // 밤
-      mainColor = const Color(0xFF1A1A2E).withOpacity(0.3);
-      shadowColor = Colors.black.withOpacity(0.2);
+      mainColor = const Color(0xFF1A1A2E).withValues(alpha: 0.3);
+      shadowColor = Colors.black.withValues(alpha: 0.2);
     }
 
     for (var cloud in _clouds) {

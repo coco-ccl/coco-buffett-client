@@ -281,7 +281,7 @@ class _StatRow extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             border: Border.all(color: Colors.black, width: 2),
           ),
           child: Icon(icon, color: color, size: 24),
@@ -332,7 +332,7 @@ class _StockItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF4A90E2).withOpacity(0.1),
+              color: const Color(0xFF4A90E2).withValues(alpha: 0.1),
               border: Border.all(color: const Color(0xFF4A90E2), width: 2),
             ),
             child: const Icon(Icons.show_chart, size: 24, color: Color(0xFF4A90E2)),
@@ -570,7 +570,7 @@ class _PixelBorderPainter extends CustomPainter {
       final bevelWidth = borderWidth + 2;
 
       final highlightPaint = Paint()
-        ..color = Colors.white.withOpacity(0.7)
+        ..color = Colors.white.withValues(alpha: 0.7)
         ..style = PaintingStyle.fill;
 
       final topBevel = Path();
@@ -590,7 +590,7 @@ class _PixelBorderPainter extends CustomPainter {
       canvas.drawPath(leftBevel, highlightPaint);
 
       final shadowPaint = Paint()
-        ..color = Colors.black.withOpacity(0.4)
+        ..color = Colors.black.withValues(alpha: 0.4)
         ..style = PaintingStyle.fill;
 
       final bottomBevel = Path();

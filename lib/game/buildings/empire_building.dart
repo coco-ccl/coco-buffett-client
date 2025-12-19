@@ -110,11 +110,11 @@ class EmpireBuilding extends Building {
     for (double y = rect.top + gapY; y < rect.bottom - gapY; y += gapY + winH) {
       for (double x = rect.left + gapX; x < rect.right - gapX - winW; x += gapX + winW) {
         if (_random.nextDouble() > 0.4) {
-          final winColor = colorSet.windowOn.withOpacity(0.8);
+          final winColor = colorSet.windowOn.withValues(alpha: 0.8);
           canvas.drawRect(Rect.fromLTWH(x, y, winW, winH), Paint()..color = winColor);
           canvas.drawRect(
             Rect.fromLTWH(x - 1, y - 1, winW + 2, winH + 2),
-            Paint()..color = winColor.withOpacity(0.1),
+            Paint()..color = winColor.withValues(alpha: 0.1),
           );
         } else {
           canvas.drawRect(Rect.fromLTWH(x, y, winW, winH), Paint()..color = colorSet.windowOff);

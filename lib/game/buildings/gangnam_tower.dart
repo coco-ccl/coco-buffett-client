@@ -86,7 +86,7 @@ class GangnamTower extends Building {
   }
 
   void _drawModernFacade(Canvas canvas) {
-    final paint = Paint()..color = Colors.black.withOpacity(0.4);
+    final paint = Paint()..color = Colors.black.withValues(alpha: 0.4);
     final double xStep = pSize * 8 * buildingScale;
     final double yStep = pSize * 10 * buildingScale;
 
@@ -97,7 +97,7 @@ class GangnamTower extends Building {
       canvas.drawRect(Rect.fromLTWH(0, y, size.x, pSize * 0.5 * buildingScale), paint);
     }
 
-    final shinePaint = Paint()..color = Colors.white.withOpacity(0.05);
+    final shinePaint = Paint()..color = Colors.white.withValues(alpha: 0.05);
     final path = Path()
       ..moveTo(pSize * 15 * buildingScale, 0)
       ..lineTo(size.x, size.y * 0.4)
@@ -117,7 +117,7 @@ class GangnamTower extends Building {
     canvas.drawLine(Offset(size.x, 0), Offset(size.x, size.y), paint);
 
     final glowPaint = Paint()
-      ..color = colorSet.neon.withOpacity(0.15)
+      ..color = colorSet.neon.withValues(alpha: 0.15)
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, 6 * buildingScale);
     canvas.drawRect(Rect.fromLTWH(-pSize * buildingScale, 0, pSize * 2 * buildingScale, size.y), glowPaint);
     canvas.drawRect(Rect.fromLTWH(size.x - pSize * buildingScale, 0, pSize * 2 * buildingScale, size.y), glowPaint);
@@ -132,7 +132,7 @@ class GangnamTower extends Building {
     for (double y = pSize * 20 * buildingScale; y < size.y - pSize * 25 * buildingScale; y += gapY) {
       for (double x = pSize * 5 * buildingScale; x < size.x - gapX; x += gapX) {
         if (_random.nextDouble() > 0.6) {
-          final winColor = colorSet.windowOn.withOpacity(0.8);
+          final winColor = colorSet.windowOn.withValues(alpha: 0.8);
           canvas.drawRect(Rect.fromLTWH(x, y, fixedWinW, fixedWinH), Paint()..color = winColor);
           canvas.drawRect(Rect.fromLTWH(x - 1, y - 1, fixedWinW + 2, fixedWinH + 2), Paint()..color = winColor.withOpacity(0.1));
         }

@@ -92,7 +92,7 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
                 margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: Colors.white, width: 2),
                 ),
@@ -580,7 +580,7 @@ class PixelBorderPainter extends CustomPainter {
 
       // 밝은 베벨 (왼쪽 + 상단)
       final highlightPaint = Paint()
-        ..color = Colors.white.withOpacity(0.7)
+        ..color = Colors.white.withValues(alpha: 0.7)
         ..style = PaintingStyle.fill;
 
       // 상단 베벨
@@ -603,7 +603,7 @@ class PixelBorderPainter extends CustomPainter {
 
       // 어두운 베벨 (오른쪽 + 하단)
       final shadowPaint = Paint()
-        ..color = Colors.black.withOpacity(0.4)
+        ..color = Colors.black.withValues(alpha: 0.4)
         ..style = PaintingStyle.fill;
 
       // 하단 베벨
