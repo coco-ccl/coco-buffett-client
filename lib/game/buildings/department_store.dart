@@ -1,8 +1,57 @@
 import 'dart:ui';
+import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/collisions.dart';
 import 'package:flutter/material.dart';
 import 'building.dart';
+import '../coco_game.dart';
+import '../player_bloc/player_bloc.dart';
+
+/// 백화점 문 영역 - 충돌 감지용
+class DepartmentStoreDoor extends PositionComponent
+    with CollisionCallbacks, HasGameReference<CocoGame> {
+  double _cooldown = 0;
+  static const double cooldownTime = 1.0; // 1초 쿨다운
+
+  DepartmentStoreDoor({
+    required Vector2 position,
+    required Vector2 size,
+  }) : super(position: position, size: size);
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    add(RectangleHitbox());
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (_cooldown > 0) {
+      _cooldown -= dt;
+    }
+  }
+
+  // render 메서드 제거 - 디버그용이었음
+
+  @override
+  void onCollisionStart(
+    Set<Vector2> intersectionPoints,
+    PositionComponent other,
+  ) {
+    super.onCollisionStart(intersectionPoints, other);
+
+    // Player와 충돌 시 shop 진입 (쿨다운이 끝났을 때만)
+    if (other.runtimeType.toString() == 'Player' && _cooldown <= 0) {
+      // 캐릭터 움직임 멈춤
+      game.playerBloc.add(const PlayerEvent.moveStopped());
+
+      // shop 페이지로 이동
+      game.onEnterShop?.call();
+      _cooldown = cooldownTime;
+    }
+  }
+}
 
 /// 백화점 색상 조합 데이터 클래스
 class DepartmentColorSet {
@@ -58,12 +107,33 @@ class DepartmentStore extends Building {
           buildingScale: buildingScale,
         );
 
+  /// 문 영역의 절대 좌표 반환
+  Vector2 getDoorPosition() {
+    final doorW = pSize * 14 * buildingScale;
+    final doorH = pSize * 20 * buildingScale;
+    final centerX = size.x / 2;
+    return Vector2(
+      position.x + centerX - doorW/2,
+      position.y - doorH - 4 * buildingScale,
+    );
+  }
+
+  /// 문 크기 반환
+  Vector2 getDoorSize() {
+    final doorW = pSize * 14 * buildingScale;
+    final doorH = pSize * 20 * buildingScale;
+    return Vector2(doorW, doorH);
+  }
+
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+
+    // 건물 바닥 히트박스 (충돌 방지용)
     add(RectangleHitbox(
       position: Vector2(0, size.y - 10),
       size: Vector2(size.x, 10),
+      isSolid: true,
     ));
   }
 
@@ -135,7 +205,43 @@ class DepartmentStore extends Building {
     final clockY = balconyY + pSize * 22 * buildingScale;
     canvas.drawCircle(Offset(centerX, clockY), pSize * 6 * buildingScale, Paint()..color = colorSet.outline);
     canvas.drawCircle(Offset(centerX, clockY), pSize * 5 * buildingScale, Paint()..color = Colors.white);
-    
+
+    // 시계 바늘 추가
+    final now = DateTime.now();
+    final hourAngle = (now.hour % 12 + now.minute / 60) * 30 * 3.14159 / 180 - 3.14159 / 2;
+    final minuteAngle = (now.minute + now.second / 60) * 6 * 3.14159 / 180 - 3.14159 / 2;
+
+    // 시침 (짧고 두꺼움)
+    final hourHandPaint = Paint()
+      ..color = colorSet.outline
+      ..strokeWidth = pSize * 0.8 * buildingScale
+      ..style = PaintingStyle.stroke;
+    canvas.drawLine(
+      Offset(centerX, clockY),
+      Offset(
+        centerX + (pSize * 2.5 * buildingScale) * cos(hourAngle),
+        clockY + (pSize * 2.5 * buildingScale) * sin(hourAngle),
+      ),
+      hourHandPaint,
+    );
+
+    // 분침 (길고 얇음)
+    final minuteHandPaint = Paint()
+      ..color = colorSet.outline
+      ..strokeWidth = pSize * 0.5 * buildingScale
+      ..style = PaintingStyle.stroke;
+    canvas.drawLine(
+      Offset(centerX, clockY),
+      Offset(
+        centerX + (pSize * 4 * buildingScale) * cos(minuteAngle),
+        clockY + (pSize * 4 * buildingScale) * sin(minuteAngle),
+      ),
+      minuteHandPaint,
+    );
+
+    // 중앙 점
+    canvas.drawCircle(Offset(centerX, clockY), pSize * 0.8 * buildingScale, Paint()..color = colorSet.outline);
+
     final doorW = pSize * 14 * buildingScale;
     final doorH = pSize * 20 * buildingScale;
     canvas.drawRect(Rect.fromLTWH(centerX - doorW/2, size.y - doorH - 4 * buildingScale, doorW, doorH), Paint()..color = colorSet.outline);

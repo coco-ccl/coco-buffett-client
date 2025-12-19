@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'buildings/building.dart';
 import 'buildings/empire_building.dart';
 import 'buildings/hotel_building.dart';
-import 'buildings/department_store.dart';
+import 'buildings/department_store.dart' show DepartmentStore, DepartmentColorPresets, DepartmentStoreDoor;
 import 'buildings/gangnam_tower.dart';
 import 'buildings/apartment_building.dart';
 import 'components/sky_background.dart';
@@ -14,7 +14,8 @@ import 'components/road_layer.dart';
 
 class CityMap extends PositionComponent with HasGameReference {
   final List<Building> _buildings = [];
-  
+  DepartmentStore? _departmentStore;
+
   static const double buildingScale = 1.5;
 
   // 캐릭터 스폰 지점
@@ -81,14 +82,21 @@ class CityMap extends PositionComponent with HasGameReference {
       colorSet: HotelColorPresets.boutiquePurple,
     ));
 
-    await addBuilding(DepartmentStore(
-      position: Vector2(currentX + 50, groundY), 
-      width: 280, 
-      height: 240, 
+    _departmentStore = DepartmentStore(
+      position: Vector2(currentX + 50, groundY),
+      width: 280,
+      height: 240,
       buildingScale: buildingScale,
       colorSet: DepartmentColorPresets.classicShinsegae,
-    ));
+    );
+    await addBuilding(_departmentStore!);
     currentX += 50;
+
+    // DepartmentStore 문 영역 추가 (별도 컴포넌트로)
+    await add(DepartmentStoreDoor(
+      position: _departmentStore!.getDoorPosition(),
+      size: _departmentStore!.getDoorSize(),
+    ));
 
     await addBuilding(GangnamTower(
       position: Vector2(currentX, groundY),

@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:flame/components.dart';
+import 'package:flame/collisions.dart';
 import 'package:flame_bloc/flame_bloc.dart';
 import 'package:flutter/material.dart';
 import '../game/sprite_layers.dart';
@@ -7,7 +8,7 @@ import '../game/player_bloc/player_bloc.dart';
 import '../game/coco_game.dart';
 
 class Player extends PositionComponent
-    with HasGameReference<CocoGame>, FlameBlocReader<PlayerBloc, PlayerState> {
+    with HasGameReference<CocoGame>, FlameBlocReader<PlayerBloc, PlayerState>, CollisionCallbacks {
   Map<Direction, ui.Image>? _images;
 
   static const double speed = 150.0;
@@ -24,6 +25,12 @@ class Player extends PositionComponent
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+
+    // 충돌 감지용 Hitbox 추가 (캐릭터 하단 전체)
+    await add(RectangleHitbox(
+      position: Vector2(size.x * 0.2, size.y * 0.6),
+      size: Vector2(size.x * 0.6, size.y * 0.4),
+    ));
 
     await add(
       FlameBlocListener<PlayerBloc, PlayerState>(
@@ -62,15 +69,15 @@ class Player extends PositionComponent
     if (velocity.isZero()) return;
 
     final displacement = velocity * speed * dt;
-    
+
     // 히트박스: 캐릭터의 발 주변 (중앙 하단)
     // 캐릭터 가로가 64픽셀일 때, 중앙 24픽셀 정도만 충돌 판정
     Rect getHitbox(Vector2 pos) {
       return Rect.fromLTWH(
-        pos.x + 20,          
-        pos.y + size.y - 12, 
-        size.x - 40,         
-        8,                   
+        pos.x + 20,
+        pos.y + size.y - 12,
+        size.x - 40,
+        8,
       );
     }
 

@@ -1,5 +1,4 @@
 import 'package:flame/game.dart';
-import 'package:flame/components.dart';
 import 'package:flame/input.dart';
 import 'package:flame_bloc/flame_bloc.dart';
 import 'package:flutter/material.dart';
@@ -9,12 +8,16 @@ import 'keyboard_input_handler.dart';
 import 'city_map.dart';
 
 /// COCO 게임 - Flame 기반 2D 캐릭터 게임
-class CocoGame extends FlameGame with HasKeyboardHandlerComponents {
+class CocoGame extends FlameGame with HasKeyboardHandlerComponents, HasCollisionDetection {
   final PlayerBloc playerBloc;
+  final Function()? onEnterShop;
   KeyboardInputHandler? _keyboardHandler;
   late CityMap cityMap;
 
-  CocoGame({required this.playerBloc});
+  CocoGame({
+    required this.playerBloc,
+    this.onEnterShop,
+  });
 
   @override
   Color backgroundColor() => const Color(0xFFF0F0F0);

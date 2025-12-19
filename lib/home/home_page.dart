@@ -21,7 +21,14 @@ class _HomePageState extends State<HomePage> {
     // game이 아직 초기화되지 않았을 때만 초기화
     if (!_isGameInitialized) {
       final playerBloc = context.read<PlayerBloc>();
-      game = CocoGame(playerBloc: playerBloc);
+      game = CocoGame(
+        playerBloc: playerBloc,
+        onEnterShop: () {
+          if (mounted) {
+            context.push('/shop');
+          }
+        },
+      );
       _isGameInitialized = true;
     }
   }
