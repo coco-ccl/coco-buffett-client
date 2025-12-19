@@ -14,6 +14,12 @@ class SkyBackground extends PositionComponent with HasGameReference {
   }
 
   @override
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
+    this.size = size;
+  }
+
+  @override
   void render(Canvas canvas) {
     final now = DateTime.now();
     final hour = now.hour + (now.minute / 60.0);

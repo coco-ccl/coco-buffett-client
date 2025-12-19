@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'stock_bloc/stock_bloc.dart';
 import 'widgets/candlestick_chart.dart';
+import '../widgets/pixel_widgets.dart';
 
 class StockPage extends StatefulWidget {
   const StockPage({super.key});
@@ -33,23 +35,45 @@ class _StockPageState extends State<StockPage> {
     return '${change >= 0 ? '+' : ''}${change.toStringAsFixed(2)}%';
   }
 
+  Widget _pixelBox({
+    required Widget child,
+    Color borderColor = const Color(0xFF4A90E2),
+    Color? backgroundColor,
+  }) {
+    return ClipPath(
+      clipper: PixelClipper(notchSize: 6),
+      child: CustomPaint(
+        painter: PixelBorderPainter(
+          borderColor: borderColor,
+          borderWidth: 3,
+          notchSize: 6,
+          has3DEffect: true,
+        ),
+        child: Container(
+          color: backgroundColor ?? Colors.white,
+          child: child,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: const Color(0xFFF5F5DC), // 베이지 배경
       appBar: AppBar(
         title: const Text(
-          'Stock Master',
+          '주식 거래소',
           style: TextStyle(
-            color: Colors.blue,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
-            fontSize: 24,
+            color: Colors.white,
           ),
         ),
-        backgroundColor: Colors.white,
-        elevation: 1,
+        backgroundColor: const Color(0xFF4A90E2), // 모던 블루
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => context.pop(),
         ),
         actions: [
@@ -67,26 +91,26 @@ class _StockPageState extends State<StockPage> {
                     },
                   );
                   final totalAssets = data.currentBalance + portfolioValue;
+                  final numberFormat = NumberFormat('#,###');
 
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 16),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                  return Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                    child: Row(
                       children: [
-                        const Text(
-                          '총 자산',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
-                        ),
+                        const Icon(Icons.account_balance_wallet, color: Color(0xFFFFD700), size: 20),
+                        const SizedBox(width: 6),
                         Text(
-                          '₩${_formatPrice(totalAssets)}',
+                          '₩${numberFormat.format(totalAssets.toInt())}',
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: Colors.green,
+                            color: Colors.white,
                           ),
                         ),
                       ],
@@ -178,74 +202,77 @@ class _StockPageState extends State<StockPage> {
   }
 
   Widget _buildEventBanner(dynamic event) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: event.isPositive
-              ? [Colors.green.shade400, Colors.blue.shade500, Colors.purple.shade500]
-              : [Colors.red.shade500, Colors.pink.shade500, Colors.orange.shade500],
+    return ClipPath(
+      clipper: PixelClipper(notchSize: 6),
+      child: CustomPaint(
+        painter: PixelBorderPainter(
+          borderColor: Colors.black,
+          borderWidth: 3,
+          notchSize: 6,
+          has3DEffect: true,
         ),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Text(
-            event.title.split(' ')[0],
-            style: const TextStyle(fontSize: 24),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  event.title.substring(event.title.indexOf(' ') + 1),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  event.description,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: event.isPositive
+                  ? [Colors.green.shade400, Colors.blue.shade500, Colors.purple.shade500]
+                  : [Colors.red.shade500, Colors.pink.shade500, Colors.orange.shade500],
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          child: Row(
             children: [
               Text(
-                '이벤트 진행중',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.75),
-                  fontSize: 12,
+                event.title.split(' ')[0],
+                style: const TextStyle(fontSize: 24),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      event.title.substring(event.title.indexOf(' ') + 1),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      event.description,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const Text(
-                '⏰ 진행중',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'monospace',
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '이벤트 진행중',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.75),
+                      fontSize: 12,
+                    ),
+                  ),
+                  const Text(
+                    '⏰ 진행중',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -256,50 +283,51 @@ class _StockPageState extends State<StockPage> {
     double totalProfit,
     double totalProfitRate,
   ) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+    return ClipPath(
+      clipper: PixelClipper(notchSize: 6),
+      child: CustomPaint(
+        painter: PixelBorderPainter(
+          borderColor: const Color(0xFF4A90E2),
+          borderWidth: 3,
+          notchSize: 6,
+          has3DEffect: true,
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          color: Colors.white,
+          child: Row(
+            children: [
+              Expanded(
+                child: _buildSummaryItem(
+                  '보유현금',
+                  '₩${_formatPrice(data.currentBalance)}',
+                  Colors.blue,
+                ),
+              ),
+              Expanded(
+                child: _buildSummaryItem(
+                  '주식평가금액',
+                  '₩${_formatPrice(portfolioValue)}',
+                  Colors.purple,
+                ),
+              ),
+              Expanded(
+                child: _buildSummaryItem(
+                  '총 수익률',
+                  '${totalProfitRate >= 0 ? '+' : ''}${totalProfitRate.toStringAsFixed(2)}%',
+                  totalProfitRate >= 0 ? Colors.green : Colors.red,
+                ),
+              ),
+              Expanded(
+                child: _buildSummaryItem(
+                  '총 손익금',
+                  '${totalProfit >= 0 ? '+' : ''}₩${_formatPrice(totalProfit.abs())}',
+                  totalProfit >= 0 ? Colors.green : Colors.red,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildSummaryItem(
-              '보유현금',
-              '₩${_formatPrice(data.currentBalance)}',
-              Colors.blue,
-            ),
-          ),
-          Expanded(
-            child: _buildSummaryItem(
-              '주식평가금액',
-              '₩${_formatPrice(portfolioValue)}',
-              Colors.purple,
-            ),
-          ),
-          Expanded(
-            child: _buildSummaryItem(
-              '총 수익률',
-              '${totalProfitRate >= 0 ? '+' : ''}${totalProfitRate.toStringAsFixed(2)}%',
-              totalProfitRate >= 0 ? Colors.green : Colors.red,
-            ),
-          ),
-          Expanded(
-            child: _buildSummaryItem(
-              '총 손익금',
-              '${totalProfit >= 0 ? '+' : ''}₩${_formatPrice(totalProfit.abs())}',
-              totalProfit >= 0 ? Colors.green : Colors.red,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -328,20 +356,11 @@ class _StockPageState extends State<StockPage> {
   }
 
   Widget _buildStockList(StockData data) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
+    return _pixelBox(
+      backgroundColor: const Color(0xFFEEE8D5), // 베이지와 어울리는 따뜻한 톤
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Row(
@@ -360,6 +379,7 @@ class _StockPageState extends State<StockPage> {
           const SizedBox(height: 16),
           ...data.stocks.map((stock) => _buildStockItem(stock, data)),
         ],
+        ),
       ),
     );
   }
@@ -378,111 +398,109 @@ class _StockPageState extends State<StockPage> {
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.blue.shade50 : Colors.grey.shade50,
-          border: Border.all(
-            color: isSelected ? Colors.blue.shade200 : Colors.transparent,
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: isAffectedByEvent
-              ? [
-                  BoxShadow(
-                    color: Colors.green.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: ClipPath(
+          clipper: PixelClipper(notchSize: 4),
+          child: CustomPaint(
+            painter: PixelBorderPainter(
+              borderColor: isSelected ? const Color(0xFF4A90E2) : Colors.black.withValues(alpha: 0.2),
+              borderWidth: isSelected ? 3 : 2,
+              notchSize: 4,
+              has3DEffect: isSelected,
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              color: isSelected
+                  ? const Color(0xFFE3F2FD)
+                  : (isAffectedByEvent ? const Color(0xFFE8F5E9) : Colors.white),
+              child: Row(
                 children: [
-                  Row(
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              stock.symbol,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                            if (stock.isLeverage) ...[
+                              const SizedBox(width: 4),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: stock.leverageType == 'long'
+                                      ? Colors.blue
+                                      : Colors.red,
+                                ),
+                                child: Text(
+                                  stock.leverageType == 'long' ? '2X↗' : '2X↙',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                            if (isAffectedByEvent) ...[
+                              const SizedBox(width: 4),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: const BoxDecoration(
+                                  color: Colors.green,
+                                ),
+                                child: const Text(
+                                  'HOT!',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        Text(
+                          stock.name,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        stock.symbol,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                        '₩${_formatPrice(stock.price)}',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        _formatChange(stock.change),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: stock.change >= 0 ? Colors.red : Colors.blue,
                         ),
                       ),
-                      if (stock.isLeverage) ...[
-                        const SizedBox(width: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 4,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: stock.leverageType == 'long'
-                                ? Colors.blue
-                                : Colors.red,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            stock.leverageType == 'long' ? '2X↗' : '2X↙',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                      if (isAffectedByEvent) ...[
-                        const SizedBox(width: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 4,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            'HOT!',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
                     ],
-                  ),
-                  Text(
-                    stock.name,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
                   ),
                 ],
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '₩${_formatPrice(stock.price)}',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  _formatChange(stock.change),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: stock.change >= 0 ? Colors.red : Colors.blue,
-                  ),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -495,20 +513,11 @@ class _StockPageState extends State<StockPage> {
     final quantity = int.tryParse(_quantityController.text) ?? 0;
     final totalAmount = selectedStock.price * quantity;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
+    return _pixelBox(
+      backgroundColor: const Color(0xFFEEE8D5),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -541,13 +550,12 @@ class _StockPageState extends State<StockPage> {
           const SizedBox(height: 16),
 
           // 선택된 주식 정보
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
+          ClipPath(
+            clipper: PixelClipper(notchSize: 4),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              color: Colors.white,
+              child: Column(
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -580,6 +588,7 @@ class _StockPageState extends State<StockPage> {
                   ],
                 ),
               ],
+              ),
             ),
           ),
 
@@ -587,13 +596,12 @@ class _StockPageState extends State<StockPage> {
 
           // 차트 영역
           if (_showChart) ...[
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
+            ClipPath(
+              clipper: PixelClipper(notchSize: 4),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                color: Colors.white,
+                child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Row(
@@ -664,6 +672,7 @@ class _StockPageState extends State<StockPage> {
                     ],
                   ),
                 ],
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -673,36 +682,56 @@ class _StockPageState extends State<StockPage> {
           Row(
             children: [
               Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _isBuyMode = true;
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        _isBuyMode ? Colors.red : Colors.grey.shade300,
-                    foregroundColor: _isBuyMode ? Colors.white : Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                child: ClipPath(
+                  clipper: PixelClipper(notchSize: 4),
+                  child: Material(
+                    color: _isBuyMode ? Colors.red : const Color(0xFFE0E0E0),
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          _isBuyMode = true;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '매수',
+                          style: TextStyle(
+                            color: _isBuyMode ? Colors.white : Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                  child: const Text('매수'),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _isBuyMode = false;
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        !_isBuyMode ? Colors.blue : Colors.grey.shade300,
-                    foregroundColor: !_isBuyMode ? Colors.white : Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                child: ClipPath(
+                  clipper: PixelClipper(notchSize: 4),
+                  child: Material(
+                    color: !_isBuyMode ? Colors.blue : const Color(0xFFE0E0E0),
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          _isBuyMode = false;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '매도',
+                          style: TextStyle(
+                            color: !_isBuyMode ? Colors.white : Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                  child: const Text('매도'),
                 ),
               ),
             ],
@@ -719,33 +748,39 @@ class _StockPageState extends State<StockPage> {
             ),
           ),
           const SizedBox(height: 8),
-          TextField(
-            controller: _quantityController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              hintText: '주문할 수량을 입력하세요',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.blue, width: 2),
+          ClipPath(
+            clipper: PixelClipper(notchSize: 4),
+            child: Container(
+              color: Colors.white,
+              child: TextField(
+                controller: _quantityController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  hintText: '주문할 수량을 입력하세요',
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.all(12),
+                ),
+                onChanged: (_) => setState(() {}),
               ),
             ),
-            onChanged: (_) => setState(() {}),
           ),
 
           const SizedBox(height: 16),
 
           // 예상 금액
           if (quantity > 0)
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.yellow.shade50,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
+            ClipPath(
+              clipper: PixelClipper(notchSize: 4),
+              child: CustomPaint(
+                painter: PixelBorderPainter(
+                  borderColor: const Color(0xFFFDD835),
+                  borderWidth: 2,
+                  notchSize: 4,
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  color: const Color(0xFFFFFDE7),
+                  child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -763,42 +798,59 @@ class _StockPageState extends State<StockPage> {
                     ),
                   ),
                 ],
+                  ),
+                ),
               ),
             ),
 
           const SizedBox(height: 16),
 
           // 주문 버튼
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: quantity > 0
-                  ? () {
-                      if (_isBuyMode) {
-                        context.read<StockBloc>().add(StockEvent.buyStock(
-                          symbol: selectedStock.symbol,
-                          quantity: quantity,
-                        ));
-                      } else {
-                        context.read<StockBloc>().add(StockEvent.sellStock(
-                          symbol: selectedStock.symbol,
-                          quantity: quantity,
-                        ));
-                      }
-                      _quantityController.clear();
-                    }
-                  : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _isBuyMode ? Colors.red : Colors.blue,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                disabledBackgroundColor: Colors.grey.shade300,
+          ClipPath(
+            clipper: PixelClipper(notchSize: 4),
+            child: CustomPaint(
+              painter: PixelBorderPainter(
+                borderColor: quantity > 0
+                    ? (_isBuyMode ? Colors.red.shade800 : Colors.blue.shade800)
+                    : Colors.grey,
+                borderWidth: 3,
+                notchSize: 4,
+                has3DEffect: quantity > 0,
               ),
-              child: Text(
-                '${_isBuyMode ? '매수' : '매도'} 주문',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
+              child: Material(
+                color: quantity > 0
+                    ? (_isBuyMode ? Colors.red : Colors.blue)
+                    : const Color(0xFFE0E0E0),
+                child: InkWell(
+                  onTap: quantity > 0
+                      ? () {
+                          if (_isBuyMode) {
+                            context.read<StockBloc>().add(StockEvent.buyStock(
+                              symbol: selectedStock.symbol,
+                              quantity: quantity,
+                            ));
+                          } else {
+                            context.read<StockBloc>().add(StockEvent.sellStock(
+                              symbol: selectedStock.symbol,
+                              quantity: quantity,
+                            ));
+                          }
+                          _quantityController.clear();
+                        }
+                      : null,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '${_isBuyMode ? '매수' : '매도'} 주문',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: quantity > 0 ? Colors.white : Colors.grey.shade600,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -816,25 +868,18 @@ class _StockPageState extends State<StockPage> {
             ),
           ],
         ],
+        ),
       ),
     );
   }
 
   Widget _buildPortfolio(StockData data) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
+    return _pixelBox(
+      borderColor: const Color(0xFF9C27B0),
+      backgroundColor: const Color(0xFFEEE8D5),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Row(
@@ -873,12 +918,12 @@ class _StockPageState extends State<StockPage> {
 
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
+                child: ClipPath(
+                  clipper: PixelClipper(notchSize: 3),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    color: Colors.white,
+                    child: Column(
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -922,10 +967,13 @@ class _StockPageState extends State<StockPage> {
                       ],
                     ),
                   ],
+                    ),
+                  ),
                 ),
               );
             }),
-        ],
+          ],
+        ),
       ),
     );
   }

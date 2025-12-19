@@ -15,6 +15,8 @@ import 'components/road_layer.dart';
 class CityMap extends PositionComponent with HasGameReference {
   final List<Building> _buildings = [];
   DepartmentStore? _departmentStore;
+  RoadLayer? _sidewalkLayer;
+  RoadLayer? _asphaltLayer;
 
   static const double buildingScale = 1.5;
 
@@ -33,17 +35,20 @@ class CityMap extends PositionComponent with HasGameReference {
 
     // 2. 타일 기반 길 추가 (인도 및 차도)
     // 인도 (Sidewalk)
-    await add(RoadLayer(
+    _sidewalkLayer = RoadLayer(
       position: Vector2(0, 620),
       size: Vector2(size.x, 40),
       style: RoadTileStyle.sidewalk,
-    ));
+    );
+    await add(_sidewalkLayer!);
+
     // 차도 (Asphalt)
-    await add(RoadLayer(
+    _asphaltLayer = RoadLayer(
       position: Vector2(0, 660),
       size: Vector2(size.x, 180),
       style: RoadTileStyle.asphalt,
-    ));
+    );
+    await add(_asphaltLayer!);
 
     const double groundY = 620.0; 
     double currentX = 150.0;
@@ -123,6 +128,17 @@ class CityMap extends PositionComponent with HasGameReference {
       buildingScale: buildingScale,
       colorSet: GangnamColorPresets.emeraldGreen,
     ));
+  }
+
+  @override
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
+    // CityMap의 높이를 게임 화면 크기에 맞춰 업데이트
+    this.size = Vector2(4500, size.y);
+
+    // RoadLayer들의 너비를 업데이트
+    _sidewalkLayer?.size = Vector2(this.size.x, 40);
+    _asphaltLayer?.size = Vector2(this.size.x, 180);
   }
 
   @override

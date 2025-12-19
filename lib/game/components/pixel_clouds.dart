@@ -11,7 +11,7 @@ class PixelClouds extends Component with HasGameReference {
   Future<void> onLoad() async {
     for (int i = 0; i < 8; i++) {
       _clouds.add(_Cloud(
-        x: _random.nextDouble() * 1200,
+        x: _random.nextDouble() * game.size.x,
         y: _random.nextDouble() * 200 + 50,
         speed: _random.nextDouble() * 15 + 5,
         scale: _random.nextDouble() * 0.6 + 0.7,
