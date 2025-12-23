@@ -1,4 +1,6 @@
 import 'package:cocobuffett/asset/asset_page.dart';
+import 'package:cocobuffett/auth/signup_page.dart';
+import 'package:cocobuffett/auth/login_page.dart';
 import 'package:cocobuffett/home/home_page.dart';
 import 'package:cocobuffett/inventory/inventory_page.dart';
 import 'package:cocobuffett/shop/shop_page.dart';
@@ -10,7 +12,7 @@ class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
   static final GoRouter _router = GoRouter(
-    initialLocation: '/',
+    initialLocation: '/signup',
     navigatorKey: _rootNavigatorKey,
     debugLogDiagnostics: true,
     routes: [
@@ -38,6 +40,16 @@ class AppRouter {
         path: '/asset',
         name: 'asset',
         builder: (context, state) => const AssetPage(),
+      ),
+      GoRoute(
+        path: '/signup',
+        name: 'signup',
+        builder: (context, state) => const SignupPage(),
+      ),
+      GoRoute(
+        path: '/login',
+        name: 'login',
+        builder: (context, state) => const LoginPage(),
       ),
     ],
   );

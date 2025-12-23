@@ -6,22 +6,29 @@ import 'package:cocobuffett/shop/shop_bloc/shop_bloc.dart';
 import 'package:cocobuffett/data/repositories/asset_repository.dart';
 import 'package:cocobuffett/data/repositories/item_repository.dart';
 import 'package:cocobuffett/data/repositories/stock_repository.dart';
+import 'package:cocobuffett/data/repositories/auth_repository.dart';
+import 'package:cocobuffett/data/api/api_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'route/app_router.dart';
+
+// 전역 ApiClient - 모든 Repository가 공유
+final apiClient = ApiClient();
 
 // Repository 전역 인스턴스
 late final AssetRepository _assetRepository;
 late final ItemRepository _itemRepository;
 late final StockRepository _stockRepository;
+late final AuthRepository _authRepository;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Repository 생성 및 초기화 (await으로 완료 대기)
-  _assetRepository = AssetRepository(useMockData: true);
-  _itemRepository = ItemRepository(useMockData: true);
-  _stockRepository = StockRepository(useMockData: true);
+  _assetRepository = AssetRepository(apiClient: apiClient, useMockData: true);
+  _itemRepository = ItemRepository(apiClient: apiClient, useMockData: true);
+  _stockRepository = StockRepository(apiClient: apiClient, useMockData: true);
+  _authRepository = AuthRepository(apiClient: apiClient, useMockData: false);
 
   await _assetRepository.initialize();
   await _itemRepository.initialize();
@@ -40,6 +47,7 @@ class App extends StatelessWidget {
         RepositoryProvider<AssetRepository>.value(value: _assetRepository),
         RepositoryProvider<ItemRepository>.value(value: _itemRepository),
         RepositoryProvider<StockRepository>.value(value: _stockRepository),
+        RepositoryProvider<AuthRepository>.value(value: _authRepository),
       ],
       child: MultiBlocProvider(
         providers: [

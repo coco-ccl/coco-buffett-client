@@ -8,6 +8,9 @@ import '../models/item_response.dart';
 import '../models/equipped_item_response.dart';
 import '../models/purchase_item_request.dart';
 import '../models/purchase_item_response.dart';
+import '../models/signup_request.dart';
+import '../models/login_request.dart';
+import '../models/login_response.dart';
 
 /// API Client - 서버 통신 담당
 class ApiClient {
@@ -16,7 +19,7 @@ class ApiClient {
   String? _accessToken; // 인증 토큰
 
   ApiClient({
-    this.baseUrl = 'https://api.cocobuffett.com', // TODO: 실제 서버 URL로 변경
+    this.baseUrl = 'http://ec2-13-124-186-147.ap-northeast-2.compute.amazonaws.com:8080',
     String? accessToken,
   }) : _accessToken = accessToken {
     _dio = Dio(
@@ -46,9 +49,13 @@ class ApiClient {
 
     _dio.interceptors.add(
       LogInterceptor(
+        request: true,
+        requestHeader: true,
         requestBody: true,
+        responseHeader: true,
         responseBody: true,
         error: true,
+        logPrint: (obj) => print('[API] $obj'),
       ),
     );
   }
@@ -187,6 +194,42 @@ class ApiClient {
       return ApiResponse.fromJson(
         response.data,
         (json) => PurchaseItemResponse.fromJson(json as Map<String, dynamic>),
+      );
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  /// 회원가입
+  /// POST /cocobuffet/v1/members/signup
+  Future<ApiResponse<dynamic>> signup(SignupRequest request) async {
+    try {
+      final response = await _dio.post(
+        '/cocobuffet/v1/members/signup',
+        data: request.toJson(),
+      );
+
+      return ApiResponse.fromJson(
+        response.data,
+        (json) => json,
+      );
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  /// 로그인
+  /// POST /cocobuffett/v1/members/signin
+  Future<ApiResponse<LoginResponse>> signin(LoginRequest request) async {
+    try {
+      final response = await _dio.post(
+        '/cocobuffett/v1/members/signin',
+        data: request.toJson(),
+      );
+
+      return ApiResponse.fromJson(
+        response.data,
+        (json) => LoginResponse.fromJson(json as Map<String, dynamic>),
       );
     } on DioException catch (e) {
       throw _handleDioError(e);
