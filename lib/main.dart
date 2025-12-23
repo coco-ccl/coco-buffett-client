@@ -26,7 +26,7 @@ void main() async {
 
   // Repository 생성 및 초기화 (await으로 완료 대기)
   _assetRepository = AssetRepository(apiClient: apiClient, useMockData: true);
-  _itemRepository = ItemRepository(apiClient: apiClient, useMockData: true);
+  _itemRepository = ItemRepository(apiClient: apiClient, useMockData: false);
   _stockRepository = StockRepository(apiClient: apiClient, useMockData: true);
   _authRepository = AuthRepository(apiClient: apiClient, useMockData: false);
 
@@ -56,7 +56,9 @@ class App extends StatelessWidget {
             lazy: false,
           ),
           BlocProvider(
-            create: (context) => PlayerBloc(),
+            create: (context) => PlayerBloc(
+              itemRepository: context.read<ItemRepository>(),
+            ),
             lazy: false,
           ),
           BlocProvider(

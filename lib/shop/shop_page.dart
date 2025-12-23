@@ -347,14 +347,20 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
     );
   }
 
-  Widget _buildItemCard(GameItem item, void Function(GameItem) onSelect) {
+  Widget _buildItemCard(GameItem item, void Function(GameItem)? onSelect) {
     // 아이템 상태 확인
     final isEquipped = _equippedItemIds.contains(item.itemId); // 착용 중
     final isOwned = item.isOwned; // 보유 중
 
     return GestureDetector(
       onTap: () {
-        _handleItemSelect(context, item, onSelect);
+        if (isOwned) {
+          // 보유 중인 아이템: 인벤토리로 이동하여 착용하도록 안내
+          _showInventoryPrompt();
+        } else {
+          // 미보유 아이템: 구매 처리
+          _handleItemPurchase(context, item);
+        }
       },
       child: ClipPath(
         clipper: PixelClipper(notchSize: 4),
@@ -441,8 +447,8 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
                   ),
                 ),
                 const SizedBox(height: 6),
-                // 착용/구매 버튼 (착용 중이 아닌 경우만)
-                if (!isEquipped)
+                // 구매 버튼 (미보유 아이템에만 표시)
+                if (!isOwned && !isEquipped)
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 12),
                     child: ClipPath(
@@ -458,14 +464,14 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
                           color: const Color(0xFF4A90E2),
                           child: InkWell(
                             onTap: () {
-                              _handleItemSelect(context, item, onSelect);
+                              _handleItemPurchase(context, item);
                             },
                             child: Container(
                               width: double.infinity,
                               padding: const EdgeInsets.symmetric(vertical: 6),
-                              child: Text(
-                                isOwned ? '착용' : '구매',
-                                style: const TextStyle(
+                              child: const Text(
+                                '구매',
+                                style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
@@ -486,78 +492,116 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
     );
   }
 
-  void _handleItemSelect(BuildContext context, GameItem item, void Function(GameItem) onSelect) async {
+  Future<void> _handleItemPurchase(BuildContext context, GameItem item) async {
     final shopBloc = context.read<ShopBloc>();
-    final isOwned = item.isOwned;
+    final itemRepository = context.read<ItemRepository>();
 
-    // 미보유 아이템인 경우 구매 처리
-    if (!isOwned) {
-      // ShopBloc 상태에서 현금 확인
-      final currentCash = shopBloc.state.maybeWhen(
-        loaded: (cash, _, __, ___) => cash,
-        orElse: () => 0,
+    // ShopBloc 상태에서 현금 확인
+    final currentCash = shopBloc.state.maybeWhen(
+      loaded: (cash, _, __, ___) => cash,
+      orElse: () => 0,
+    );
+
+    // 잔액 확인
+    if (currentCash < item.price) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.error, color: Colors.white, size: 20),
+              SizedBox(width: 8),
+              Text(
+                '잔액이 부족합니다!',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.red,
+        ),
       );
+      return;
+    }
 
-      // 잔액 확인
-      if (currentCash < item.price) {
+    try {
+      // 아이템 구매 API 호출
+      final remainingDeposit = await itemRepository.purchaseItem(item.itemId);
+
+      // 구매 성공: ShopBloc의 현금 업데이트
+      shopBloc.add(ShopEvent.cashUpdated(remainingDeposit));
+
+      // 아이템 리스트 새로고침 (구매한 아이템이 "보유 중"으로 표시되도록)
+      _loadItems();
+
+      // 구매 성공 스낵바 표시
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Row(
               children: [
-                Icon(Icons.error, color: Colors.white, size: 20),
-                SizedBox(width: 8),
+                const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
                 Text(
-                  '잔액이 부족합니다!',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  '${item.name}을(를) 구매했습니다! 인벤토리에서 착용하세요.',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
-            duration: Duration(seconds: 2),
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: const Color(0xFF4A90E2),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.zero,
+              side: BorderSide(color: Colors.black, width: 2),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      // 구매 실패
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  '구매 실패: $e',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
             backgroundColor: Colors.red,
           ),
         );
-        return;
       }
-
-      // TODO: 아이템 구매 로직 구현 필요
-      // ItemRepository를 통한 구매 API 호출 필요
-      // 지금은 일단 스킵하고 착용만 진행
     }
-
-    // 아이템 착용 (PlayerBloc에 이벤트 전송)
-    onSelect(item);
-
-    // _equippedItemIds는 PlayerBloc 상태 변경을 통해 자동 업데이트됨
-
-    _showPurchaseSnackBar(item, isOwned);
   }
 
-  void _showPurchaseSnackBar(GameItem item, bool wasOwned) {
+  void _showInventoryPrompt() {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.check_circle, color: Colors.white, size: 20),
-            const SizedBox(width: 8),
+            Icon(Icons.info, color: Colors.white, size: 20),
+            SizedBox(width: 8),
             Text(
-              !wasOwned
-                  ? '${item.name}을(를) 구매하고 착용했습니다!'
-                  : '${item.name}을(를) 착용했습니다!',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              '인벤토리에서 아이템을 착용할 수 있습니다!',
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ],
         ),
-        duration: const Duration(seconds: 1),
+        duration: Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: const Color(0xFF4A90E2),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.zero,
-          side: BorderSide(color: Colors.black, width: 2),
-        ),
+        backgroundColor: Color(0xFF4A90E2),
       ),
     );
   }
+
 }
 
 /// 픽셀 스타일 모서리를 만드는 커스텀 클리퍼

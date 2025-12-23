@@ -55,7 +55,7 @@ extension PlayerEventPatterns on PlayerEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _MoveStarted value)?  moveStarted,TResult Function( _MoveStopped value)?  moveStopped,TResult Function( _FaceChanged value)?  faceChanged,TResult Function( _HairChanged value)?  hairChanged,TResult Function( _TopChanged value)?  topChanged,TResult Function( _BottomChanged value)?  bottomChanged,TResult Function( _ShoesChanged value)?  shoesChanged,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _MoveStarted value)?  moveStarted,TResult Function( _MoveStopped value)?  moveStopped,TResult Function( _FaceChanged value)?  faceChanged,TResult Function( _HairChanged value)?  hairChanged,TResult Function( _TopChanged value)?  topChanged,TResult Function( _BottomChanged value)?  bottomChanged,TResult Function( _ShoesChanged value)?  shoesChanged,TResult Function( _LoadEquippedItems value)?  loadEquippedItems,TResult Function( _SetAllItems value)?  setAllItems,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _MoveStarted() when moveStarted != null:
@@ -65,7 +65,9 @@ return faceChanged(_that);case _HairChanged() when hairChanged != null:
 return hairChanged(_that);case _TopChanged() when topChanged != null:
 return topChanged(_that);case _BottomChanged() when bottomChanged != null:
 return bottomChanged(_that);case _ShoesChanged() when shoesChanged != null:
-return shoesChanged(_that);case _:
+return shoesChanged(_that);case _LoadEquippedItems() when loadEquippedItems != null:
+return loadEquippedItems(_that);case _SetAllItems() when setAllItems != null:
+return setAllItems(_that);case _:
   return orElse();
 
 }
@@ -83,7 +85,7 @@ return shoesChanged(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _MoveStarted value)  moveStarted,required TResult Function( _MoveStopped value)  moveStopped,required TResult Function( _FaceChanged value)  faceChanged,required TResult Function( _HairChanged value)  hairChanged,required TResult Function( _TopChanged value)  topChanged,required TResult Function( _BottomChanged value)  bottomChanged,required TResult Function( _ShoesChanged value)  shoesChanged,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _MoveStarted value)  moveStarted,required TResult Function( _MoveStopped value)  moveStopped,required TResult Function( _FaceChanged value)  faceChanged,required TResult Function( _HairChanged value)  hairChanged,required TResult Function( _TopChanged value)  topChanged,required TResult Function( _BottomChanged value)  bottomChanged,required TResult Function( _ShoesChanged value)  shoesChanged,required TResult Function( _LoadEquippedItems value)  loadEquippedItems,required TResult Function( _SetAllItems value)  setAllItems,}){
 final _that = this;
 switch (_that) {
 case _MoveStarted():
@@ -93,7 +95,9 @@ return faceChanged(_that);case _HairChanged():
 return hairChanged(_that);case _TopChanged():
 return topChanged(_that);case _BottomChanged():
 return bottomChanged(_that);case _ShoesChanged():
-return shoesChanged(_that);}
+return shoesChanged(_that);case _LoadEquippedItems():
+return loadEquippedItems(_that);case _SetAllItems():
+return setAllItems(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -107,7 +111,7 @@ return shoesChanged(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _MoveStarted value)?  moveStarted,TResult? Function( _MoveStopped value)?  moveStopped,TResult? Function( _FaceChanged value)?  faceChanged,TResult? Function( _HairChanged value)?  hairChanged,TResult? Function( _TopChanged value)?  topChanged,TResult? Function( _BottomChanged value)?  bottomChanged,TResult? Function( _ShoesChanged value)?  shoesChanged,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _MoveStarted value)?  moveStarted,TResult? Function( _MoveStopped value)?  moveStopped,TResult? Function( _FaceChanged value)?  faceChanged,TResult? Function( _HairChanged value)?  hairChanged,TResult? Function( _TopChanged value)?  topChanged,TResult? Function( _BottomChanged value)?  bottomChanged,TResult? Function( _ShoesChanged value)?  shoesChanged,TResult? Function( _LoadEquippedItems value)?  loadEquippedItems,TResult? Function( _SetAllItems value)?  setAllItems,}){
 final _that = this;
 switch (_that) {
 case _MoveStarted() when moveStarted != null:
@@ -117,7 +121,9 @@ return faceChanged(_that);case _HairChanged() when hairChanged != null:
 return hairChanged(_that);case _TopChanged() when topChanged != null:
 return topChanged(_that);case _BottomChanged() when bottomChanged != null:
 return bottomChanged(_that);case _ShoesChanged() when shoesChanged != null:
-return shoesChanged(_that);case _:
+return shoesChanged(_that);case _LoadEquippedItems() when loadEquippedItems != null:
+return loadEquippedItems(_that);case _SetAllItems() when setAllItems != null:
+return setAllItems(_that);case _:
   return null;
 
 }
@@ -134,7 +140,7 @@ return shoesChanged(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( Vector2 direction)?  moveStarted,TResult Function()?  moveStopped,TResult Function( String faceId)?  faceChanged,TResult Function( String hairId)?  hairChanged,TResult Function( String topId)?  topChanged,TResult Function( String bottomId)?  bottomChanged,TResult Function( String shoesId)?  shoesChanged,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( Vector2 direction)?  moveStarted,TResult Function()?  moveStopped,TResult Function( String faceId)?  faceChanged,TResult Function( String hairId)?  hairChanged,TResult Function( String topId)?  topChanged,TResult Function( String bottomId)?  bottomChanged,TResult Function( String shoesId)?  shoesChanged,TResult Function()?  loadEquippedItems,TResult Function( String faceId,  String hairId,  String topId,  String bottomId,  String shoesId)?  setAllItems,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MoveStarted() when moveStarted != null:
 return moveStarted(_that.direction);case _MoveStopped() when moveStopped != null:
@@ -143,7 +149,9 @@ return faceChanged(_that.faceId);case _HairChanged() when hairChanged != null:
 return hairChanged(_that.hairId);case _TopChanged() when topChanged != null:
 return topChanged(_that.topId);case _BottomChanged() when bottomChanged != null:
 return bottomChanged(_that.bottomId);case _ShoesChanged() when shoesChanged != null:
-return shoesChanged(_that.shoesId);case _:
+return shoesChanged(_that.shoesId);case _LoadEquippedItems() when loadEquippedItems != null:
+return loadEquippedItems();case _SetAllItems() when setAllItems != null:
+return setAllItems(_that.faceId,_that.hairId,_that.topId,_that.bottomId,_that.shoesId);case _:
   return orElse();
 
 }
@@ -161,7 +169,7 @@ return shoesChanged(_that.shoesId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( Vector2 direction)  moveStarted,required TResult Function()  moveStopped,required TResult Function( String faceId)  faceChanged,required TResult Function( String hairId)  hairChanged,required TResult Function( String topId)  topChanged,required TResult Function( String bottomId)  bottomChanged,required TResult Function( String shoesId)  shoesChanged,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( Vector2 direction)  moveStarted,required TResult Function()  moveStopped,required TResult Function( String faceId)  faceChanged,required TResult Function( String hairId)  hairChanged,required TResult Function( String topId)  topChanged,required TResult Function( String bottomId)  bottomChanged,required TResult Function( String shoesId)  shoesChanged,required TResult Function()  loadEquippedItems,required TResult Function( String faceId,  String hairId,  String topId,  String bottomId,  String shoesId)  setAllItems,}) {final _that = this;
 switch (_that) {
 case _MoveStarted():
 return moveStarted(_that.direction);case _MoveStopped():
@@ -170,7 +178,9 @@ return faceChanged(_that.faceId);case _HairChanged():
 return hairChanged(_that.hairId);case _TopChanged():
 return topChanged(_that.topId);case _BottomChanged():
 return bottomChanged(_that.bottomId);case _ShoesChanged():
-return shoesChanged(_that.shoesId);}
+return shoesChanged(_that.shoesId);case _LoadEquippedItems():
+return loadEquippedItems();case _SetAllItems():
+return setAllItems(_that.faceId,_that.hairId,_that.topId,_that.bottomId,_that.shoesId);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -184,7 +194,7 @@ return shoesChanged(_that.shoesId);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( Vector2 direction)?  moveStarted,TResult? Function()?  moveStopped,TResult? Function( String faceId)?  faceChanged,TResult? Function( String hairId)?  hairChanged,TResult? Function( String topId)?  topChanged,TResult? Function( String bottomId)?  bottomChanged,TResult? Function( String shoesId)?  shoesChanged,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( Vector2 direction)?  moveStarted,TResult? Function()?  moveStopped,TResult? Function( String faceId)?  faceChanged,TResult? Function( String hairId)?  hairChanged,TResult? Function( String topId)?  topChanged,TResult? Function( String bottomId)?  bottomChanged,TResult? Function( String shoesId)?  shoesChanged,TResult? Function()?  loadEquippedItems,TResult? Function( String faceId,  String hairId,  String topId,  String bottomId,  String shoesId)?  setAllItems,}) {final _that = this;
 switch (_that) {
 case _MoveStarted() when moveStarted != null:
 return moveStarted(_that.direction);case _MoveStopped() when moveStopped != null:
@@ -193,7 +203,9 @@ return faceChanged(_that.faceId);case _HairChanged() when hairChanged != null:
 return hairChanged(_that.hairId);case _TopChanged() when topChanged != null:
 return topChanged(_that.topId);case _BottomChanged() when bottomChanged != null:
 return bottomChanged(_that.bottomId);case _ShoesChanged() when shoesChanged != null:
-return shoesChanged(_that.shoesId);case _:
+return shoesChanged(_that.shoesId);case _LoadEquippedItems() when loadEquippedItems != null:
+return loadEquippedItems();case _SetAllItems() when setAllItems != null:
+return setAllItems(_that.faceId,_that.hairId,_that.topId,_that.bottomId,_that.shoesId);case _:
   return null;
 
 }
@@ -622,6 +634,112 @@ class __$ShoesChangedCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? shoesId = null,}) {
   return _then(_ShoesChanged(
 null == shoesId ? _self.shoesId : shoesId // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _LoadEquippedItems implements PlayerEvent {
+  const _LoadEquippedItems();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LoadEquippedItems);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'PlayerEvent.loadEquippedItems()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _SetAllItems implements PlayerEvent {
+  const _SetAllItems({required this.faceId, required this.hairId, required this.topId, required this.bottomId, required this.shoesId});
+  
+
+ final  String faceId;
+ final  String hairId;
+ final  String topId;
+ final  String bottomId;
+ final  String shoesId;
+
+/// Create a copy of PlayerEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SetAllItemsCopyWith<_SetAllItems> get copyWith => __$SetAllItemsCopyWithImpl<_SetAllItems>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SetAllItems&&(identical(other.faceId, faceId) || other.faceId == faceId)&&(identical(other.hairId, hairId) || other.hairId == hairId)&&(identical(other.topId, topId) || other.topId == topId)&&(identical(other.bottomId, bottomId) || other.bottomId == bottomId)&&(identical(other.shoesId, shoesId) || other.shoesId == shoesId));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,faceId,hairId,topId,bottomId,shoesId);
+
+@override
+String toString() {
+  return 'PlayerEvent.setAllItems(faceId: $faceId, hairId: $hairId, topId: $topId, bottomId: $bottomId, shoesId: $shoesId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$SetAllItemsCopyWith<$Res> implements $PlayerEventCopyWith<$Res> {
+  factory _$SetAllItemsCopyWith(_SetAllItems value, $Res Function(_SetAllItems) _then) = __$SetAllItemsCopyWithImpl;
+@useResult
+$Res call({
+ String faceId, String hairId, String topId, String bottomId, String shoesId
+});
+
+
+
+
+}
+/// @nodoc
+class __$SetAllItemsCopyWithImpl<$Res>
+    implements _$SetAllItemsCopyWith<$Res> {
+  __$SetAllItemsCopyWithImpl(this._self, this._then);
+
+  final _SetAllItems _self;
+  final $Res Function(_SetAllItems) _then;
+
+/// Create a copy of PlayerEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? faceId = null,Object? hairId = null,Object? topId = null,Object? bottomId = null,Object? shoesId = null,}) {
+  return _then(_SetAllItems(
+faceId: null == faceId ? _self.faceId : faceId // ignore: cast_nullable_to_non_nullable
+as String,hairId: null == hairId ? _self.hairId : hairId // ignore: cast_nullable_to_non_nullable
+as String,topId: null == topId ? _self.topId : topId // ignore: cast_nullable_to_non_nullable
+as String,bottomId: null == bottomId ? _self.bottomId : bottomId // ignore: cast_nullable_to_non_nullable
+as String,shoesId: null == shoesId ? _self.shoesId : shoesId // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

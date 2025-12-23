@@ -6,7 +6,7 @@ part 'purchase_item_request.g.dart';
 @JsonSerializable()
 class PurchaseItemRequest {
   @JsonKey(name: 'item_id')
-  final int itemId; // 구매할 아이템 ID
+  final String itemId; // 구매할 아이템 ID
 
   PurchaseItemRequest({
     required this.itemId,

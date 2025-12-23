@@ -296,10 +296,16 @@ class _InventoryPageState extends State<InventoryPage> with SingleTickerProvider
       data.shoesId,
     };
 
+    // 변경사항이 있을 때만 setState 호출 (무한 루프 방지)
     if (!_equippedItemIds.containsAll(newEquippedIds) ||
         !newEquippedIds.containsAll(_equippedItemIds)) {
-      setState(() {
-        _equippedItemIds = newEquippedIds;
+      // build 중에는 setState를 호출할 수 없으므로 post frame callback 사용
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _equippedItemIds = newEquippedIds;
+          });
+        }
       });
     }
   }
@@ -337,26 +343,62 @@ class _InventoryPageState extends State<InventoryPage> with SingleTickerProvider
     final isEquipped = _equippedItemIds.contains(item.itemId);
 
     return GestureDetector(
-      onTap: () {
-        // 착용
-        switch (category) {
-          case '얼굴':
-            playerBloc.add(PlayerEvent.faceChanged(item.itemId));
-            break;
-          case '헤어':
-            playerBloc.add(PlayerEvent.hairChanged(item.itemId));
-            break;
-          case '상의':
-            playerBloc.add(PlayerEvent.topChanged(item.itemId));
-            break;
-          case '하의':
-            playerBloc.add(PlayerEvent.bottomChanged(item.itemId));
-            break;
-          case '신발':
-            playerBloc.add(PlayerEvent.shoesChanged(item.itemId));
-            break;
+      onTap: () async {
+        // 이미 착용 중인 아이템이면 무시
+        if (isEquipped) {
+          return;
         }
-        _showEquipSnackBar(item);
+
+        try {
+          // 1. API 호출하여 서버에 착용 정보 업데이트
+          await _itemRepository.equipItem(item.itemId);
+
+          // 2. PlayerBloc 업데이트 (로컬 상태 업데이트)
+          switch (category) {
+            case '얼굴':
+              playerBloc.add(PlayerEvent.faceChanged(item.itemId));
+              break;
+            case '헤어':
+              playerBloc.add(PlayerEvent.hairChanged(item.itemId));
+              break;
+            case '상의':
+              playerBloc.add(PlayerEvent.topChanged(item.itemId));
+              break;
+            case '하의':
+              playerBloc.add(PlayerEvent.bottomChanged(item.itemId));
+              break;
+            case '신발':
+              playerBloc.add(PlayerEvent.shoesChanged(item.itemId));
+              break;
+          }
+
+          _showEquipSnackBar(item);
+        } catch (e) {
+          // 착용 실패
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.error, color: Colors.white, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      '착용 실패: $e',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                duration: const Duration(seconds: 2),
+                behavior: SnackBarBehavior.floating,
+                backgroundColor: Colors.red,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.zero,
+                  side: BorderSide(color: Colors.black, width: 2),
+                ),
+              ),
+            );
+          }
+        }
       },
       child: ClipPath(
         clipper: _PixelClipper(notchSize: 4),

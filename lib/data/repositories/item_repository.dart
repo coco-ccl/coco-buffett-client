@@ -104,8 +104,8 @@ class ItemRepository {
     throw Exception('Failed to load equipped items');
   }
 
-  /// 아이템 구매 (API 호출만)
-  Future<int> _purchaseItemAPI(int itemId) async {
+  /// 아이템 구매 (Public API)
+  Future<int> purchaseItem(String itemId) async {
     print('[ItemRepository] 아이템 구매 시작: itemId=$itemId');
 
     if (_useMockData) {
@@ -126,9 +126,25 @@ class ItemRepository {
     throw Exception(response.message);
   }
 
-  /// 아이템 구매 (Public API - 기존 코드 호환성 유지)
-  Future<int> purchaseItem(int itemId) async {
-    return _purchaseItemAPI(itemId);
+  /// 아이템 착용
+  Future<void> equipItem(String itemId) async {
+    print('[ItemRepository] 아이템 착용 시작: itemId=$itemId');
+
+    if (_useMockData) {
+      // Mock 모드: 딜레이만 추가
+      await Future.delayed(const Duration(milliseconds: 300));
+      print('[ItemRepository] 아이템 착용 성공 (Mock)');
+      return;
+    }
+
+    final response = await _apiClient.equipItem(itemId);
+    if (response.code == 0) {
+      print('[ItemRepository] 아이템 착용 성공');
+      return;
+    }
+
+    print('[ItemRepository] 아이템 착용 실패: ${response.message}');
+    throw Exception(response.message);
   }
 
   /// 아이템 구매 (캐시 업데이트 포함)

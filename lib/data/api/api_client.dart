@@ -8,6 +8,7 @@ import '../models/item_response.dart';
 import '../models/equipped_item_response.dart';
 import '../models/purchase_item_request.dart';
 import '../models/purchase_item_response.dart';
+import '../models/equip_item_request.dart';
 import '../models/signup_request.dart';
 import '../models/login_request.dart';
 import '../models/login_response.dart';
@@ -182,18 +183,37 @@ class ApiClient {
   }
 
   /// 아이템 구매
-  /// POST /cocobuffet/v1/items/purchase
-  Future<ApiResponse<PurchaseItemResponse>> purchaseItem(int itemId) async {
+  /// POST /cocobuffett/v1/items/purchase
+  Future<ApiResponse<PurchaseItemResponse>> purchaseItem(String itemId) async {
     try {
       final request = PurchaseItemRequest(itemId: itemId);
       final response = await _dio.post(
-        '/cocobuffet/v1/items/purchase',
+        '/cocobuffett/v1/items/purchase',
         data: request.toJson(),
       );
 
       return ApiResponse.fromJson(
         response.data,
         (json) => PurchaseItemResponse.fromJson(json as Map<String, dynamic>),
+      );
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  /// 아이템 착용
+  /// POST /cocobuffett/v1/items/equip
+  Future<ApiResponse<dynamic>> equipItem(String itemId) async {
+    try {
+      final request = EquipItemRequest(itemId: itemId);
+      final response = await _dio.post(
+        '/cocobuffett/v1/items/equip',
+        data: request.toJson(),
+      );
+
+      return ApiResponse.fromJson(
+        response.data,
+        (json) => json,
       );
     } on DioException catch (e) {
       throw _handleDioError(e);

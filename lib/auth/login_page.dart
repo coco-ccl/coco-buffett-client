@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../data/repositories/auth_repository.dart';
+import '../data/repositories/item_repository.dart';
+import '../game/player_bloc/player_bloc.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -36,11 +38,57 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       final authRepository = context.read<AuthRepository>();
+      final itemRepository = context.read<ItemRepository>();
+      final playerBloc = context.read<PlayerBloc>();
 
       final accessToken = await authRepository.login(
         memberId: _memberIdController.text.trim(),
         password: _passwordController.text,
       );
+
+      // 로그인 성공 후 착용 아이템 로드 (완료를 기다림)
+      print('[LoginPage] 착용 아이템 로드 시작');
+      final equippedItems = await itemRepository.getEquippedItems();
+      print('[LoginPage] 착용 아이템 ${equippedItems.length}개 로드 완료');
+
+      // 착용 아이템을 타입별로 매핑
+      String faceId = 'default';
+      String hairId = 'short_brown';
+      String topId = 'tshirt_white';
+      String bottomId = 'pants_black';
+      String shoesId = 'shoes_black';
+
+      for (final item in equippedItems) {
+        switch (item.type) {
+          case 'face':
+            faceId = item.itemId;
+            break;
+          case 'hair':
+            hairId = item.itemId;
+            break;
+          case 'top':
+            topId = item.itemId;
+            break;
+          case 'bottom':
+            bottomId = item.itemId;
+            break;
+          case 'shoes':
+            shoesId = item.itemId;
+            break;
+        }
+      }
+
+      // PlayerBloc에 모든 아이템을 한 번에 적용
+      playerBloc.add(PlayerEvent.setAllItems(
+        faceId: faceId,
+        hairId: hairId,
+        topId: topId,
+        bottomId: bottomId,
+        shoesId: shoesId,
+      ));
+
+      // 짧은 딜레이 (상태 업데이트 완료 대기)
+      await Future.delayed(const Duration(milliseconds: 100));
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -22,4 +22,16 @@ sealed class PlayerEvent with _$PlayerEvent {
 
   /// 신발 변경
   const factory PlayerEvent.shoesChanged(String shoesId) = _ShoesChanged;
+
+  /// 착용 아이템 로드
+  const factory PlayerEvent.loadEquippedItems() = _LoadEquippedItems;
+
+  /// 모든 아이템 한 번에 설정 (로그인 시 사용)
+  const factory PlayerEvent.setAllItems({
+    required String faceId,
+    required String hairId,
+    required String topId,
+    required String bottomId,
+    required String shoesId,
+  }) = _SetAllItems;
 }

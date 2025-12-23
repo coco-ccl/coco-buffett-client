@@ -7,7 +7,7 @@ part of 'purchase_item_request.dart';
 // **************************************************************************
 
 PurchaseItemRequest _$PurchaseItemRequestFromJson(Map<String, dynamic> json) =>
-    PurchaseItemRequest(itemId: (json['item_id'] as num).toInt());
+    PurchaseItemRequest(itemId: json['item_id'] as String);
 
 Map<String, dynamic> _$PurchaseItemRequestToJson(
   PurchaseItemRequest instance,

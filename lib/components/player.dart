@@ -10,6 +10,7 @@ import '../game/coco_game.dart';
 class Player extends PositionComponent
     with HasGameReference<CocoGame>, FlameBlocReader<PlayerBloc, PlayerState>, CollisionCallbacks {
   Map<Direction, ui.Image>? _images;
+  PlayerData? _previousData;
 
   static const double speed = 150.0;
   static const double spriteScale = 1.5;
@@ -38,6 +39,10 @@ class Player extends PositionComponent
       ),
     );
 
+    // 초기 스프라이트 생성
+    final initialData = bloc.state.data;
+    print('[Player] onLoad - 초기 아이템: face=${initialData.faceId}, hair=${initialData.hairId}, top=${initialData.topId}, bottom=${initialData.bottomId}, shoes=${initialData.shoesId}');
+    _previousData = initialData;
     await _regenerateSprites();
 
     // 안전한 스폰 지점으로 위치 설정 (CityMap에서 가져옴)
@@ -45,7 +50,17 @@ class Player extends PositionComponent
   }
 
   Future<void> _onPlayerStateChanged(PlayerState state) async {
-    if (state is PlayerCustomizing) {
+    final currentData = state.data;
+
+    // 아이템이 변경되었는지 확인
+    if (_previousData == null ||
+        _previousData!.faceId != currentData.faceId ||
+        _previousData!.hairId != currentData.hairId ||
+        _previousData!.topId != currentData.topId ||
+        _previousData!.bottomId != currentData.bottomId ||
+        _previousData!.shoesId != currentData.shoesId) {
+      print('[Player] 아이템 변경 감지 - 스프라이트 재생성');
+      _previousData = currentData;
       await _regenerateSprites();
     }
   }

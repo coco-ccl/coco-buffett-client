@@ -3,6 +3,7 @@ import 'package:flame/components.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../sprite_layers.dart';
+import '../../data/repositories/item_repository.dart';
 
 part 'player_event.dart';
 part 'player_state.dart';
@@ -10,7 +11,11 @@ part 'player_bloc.freezed.dart';
 
 /// 플레이어 BLoC - 캐릭터 상태 및 커스터마이징 관리
 class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
-  PlayerBloc() : super(_initState) {
+  final ItemRepository _itemRepository;
+
+  PlayerBloc({required ItemRepository itemRepository})
+      : _itemRepository = itemRepository,
+        super(_initState) {
     on<_MoveStarted>(_onMoveStarted);
     on<_MoveStopped>(_onMoveStopped);
     on<_FaceChanged>(_onFaceChanged);
@@ -18,6 +23,8 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     on<_TopChanged>(_onTopChanged);
     on<_BottomChanged>(_onBottomChanged);
     on<_ShoesChanged>(_onShoesChanged);
+    on<_LoadEquippedItems>(_onLoadEquippedItems);
+    on<_SetAllItems>(_onSetAllItems);
   }
 
   static PlayerState get _initState => const PlayerState.idle(PlayerData());
@@ -85,6 +92,71 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     emit(PlayerState.customizing(state.data.copyWith(shoesId: event.shoesId)));
     await Future.delayed(const Duration(milliseconds: 100));
     emit(PlayerState.idle(state.data));
+  }
+
+  FutureOr<void> _onLoadEquippedItems(
+    _LoadEquippedItems event,
+    Emitter<PlayerState> emit,
+  ) async {
+    try {
+      print('[PlayerBloc] 착용 아이템 로드 시작');
+      final equippedItems = await _itemRepository.getEquippedItems();
+
+      // 착용 아이템을 타입별로 매핑
+      String? faceId;
+      String? hairId;
+      String? topId;
+      String? bottomId;
+      String? shoesId;
+
+      for (final item in equippedItems) {
+        switch (item.type) {
+          case 'face':
+            faceId = item.itemId;
+            break;
+          case 'hair':
+            hairId = item.itemId;
+            break;
+          case 'top':
+            topId = item.itemId;
+            break;
+          case 'bottom':
+            bottomId = item.itemId;
+            break;
+          case 'shoes':
+            shoesId = item.itemId;
+            break;
+        }
+      }
+
+      // PlayerData 업데이트
+      emit(PlayerState.idle(state.data.copyWith(
+        faceId: faceId ?? state.data.faceId,
+        hairId: hairId ?? state.data.hairId,
+        topId: topId ?? state.data.topId,
+        bottomId: bottomId ?? state.data.bottomId,
+        shoesId: shoesId ?? state.data.shoesId,
+      )));
+
+      print('[PlayerBloc] 착용 아이템 로드 완료: face=$faceId, hair=$hairId, top=$topId, bottom=$bottomId, shoes=$shoesId');
+    } catch (e) {
+      print('[PlayerBloc] 착용 아이템 로드 실패: $e');
+      // 에러 발생 시 기본값 유지
+    }
+  }
+
+  FutureOr<void> _onSetAllItems(
+    _SetAllItems event,
+    Emitter<PlayerState> emit,
+  ) async {
+    print('[PlayerBloc] 모든 아이템 설정: face=${event.faceId}, hair=${event.hairId}, top=${event.topId}, bottom=${event.bottomId}, shoes=${event.shoesId}');
+    emit(PlayerState.idle(state.data.copyWith(
+      faceId: event.faceId,
+      hairId: event.hairId,
+      topId: event.topId,
+      bottomId: event.bottomId,
+      shoesId: event.shoesId,
+    )));
   }
 
   Direction _getDirection(Vector2 velocity) {
