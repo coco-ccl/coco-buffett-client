@@ -9,10 +9,10 @@ part of 'item_response.dart';
 ItemResponse _$ItemResponseFromJson(Map<String, dynamic> json) => ItemResponse(
   itemId: json['item_id'] as String,
   type: json['type'] as String,
-  name: json['name'] as String,
+  name: json['name'] as String?,
   price: (json['price'] as num).toInt(),
   color: json['color'] as String,
-  isOwned: json['is_owned'] as bool,
+  isOwned: json['is_owned'] as bool?,
 );
 
 Map<String, dynamic> _$ItemResponseToJson(ItemResponse instance) =>

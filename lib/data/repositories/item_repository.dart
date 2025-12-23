@@ -102,11 +102,44 @@ class ItemRepository {
     return GameItem(
       itemId: response.itemId,
       type: response.type,
-      name: response.name,
+      name: response.name ?? _getDefaultName(response.itemId),
       price: response.price,
       color: response.color,
-      isOwned: response.isOwned,
+      isOwned: response.isOwned ?? true, // owned API는 보유 중인 아이템만 반환
     );
+  }
+
+  /// itemId로 기본 이름 생성
+  String _getDefaultName(String itemId) {
+    // itemId를 기반으로 한글 이름 생성
+    final nameMap = {
+      'default': '기본',
+      'cute': '귀여움',
+      'cool': '멋짐',
+      'short_brown': '짧은 갈색',
+      'short_black': '짧은 검정',
+      'short_blonde': '짧은 금발',
+      'long_brown': '긴 갈색',
+      'long_black': '긴 검정',
+      'pomade_black': '포마드 검정',
+      'pomade_brown': '포마드 갈색',
+      'gray': '회색',
+      'tshirt_white': '흰색 티셔츠',
+      'tshirt_blue': '파란 티셔츠',
+      'tshirt_red': '빨간 티셔츠',
+      'tshirt_green': '초록 티셔츠',
+      'tshirt_flower': '꽃무늬 티셔츠',
+      'shirt_white': '흰색 셔츠',
+      'pants_black': '검정 바지',
+      'pants_navy': '네이비 바지',
+      'pants_gray': '회색 바지',
+      'jeans_blue': '파란 청바지',
+      'shoes_black': '검정 구두',
+      'shoes_brown': '갈색 구두',
+      'sneakers_white': '흰색 운동화',
+      'sneakers_black': '검정 운동화',
+    };
+    return nameMap[itemId] ?? itemId;
   }
 
   /// EquippedItemResponse를 EquippedItem으로 변환

@@ -9,6 +9,7 @@ import '../game/sprites/face.dart';
 import '../game/sprites/hair.dart';
 import '../game/sprites/shoes.dart';
 import '../game/sprites/top.dart';
+import '../data/repositories/item_repository.dart';
 
 class InventoryPage extends StatefulWidget {
   const InventoryPage({super.key});
@@ -20,48 +21,89 @@ class InventoryPage extends StatefulWidget {
 class _InventoryPageState extends State<InventoryPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  final Map<String, List<InventoryItem>> _inventoryItems = {
-    '얼굴': [
-      InventoryItem(id: 'default', name: '기본', isEquipped: false),
-      InventoryItem(id: 'cute', name: '귀여움', isEquipped: false),
-      InventoryItem(id: 'cool', name: '멋짐', isEquipped: false),
-    ],
-    '헤어': [
-      InventoryItem(id: 'short_brown', name: '짧은 갈색', isEquipped: false),
-      InventoryItem(id: 'short_black', name: '짧은 검정', isEquipped: false),
-      InventoryItem(id: 'short_blonde', name: '짧은 금발', isEquipped: false),
-      InventoryItem(id: 'long_brown', name: '긴 갈색', isEquipped: false),
-      InventoryItem(id: 'long_black', name: '긴 검정', isEquipped: false),
-      InventoryItem(id: 'pomade_black', name: '포마드 검정', isEquipped: false),
-      InventoryItem(id: 'pomade_brown', name: '포마드 갈색', isEquipped: false),
-      InventoryItem(id: 'gray', name: '회색', isEquipped: false),
-    ],
-    '상의': [
-      InventoryItem(id: 'tshirt_white', name: '흰색 티셔츠', isEquipped: false),
-      InventoryItem(id: 'tshirt_blue', name: '파란 티셔츠', isEquipped: false),
-      InventoryItem(id: 'tshirt_red', name: '빨간 티셔츠', isEquipped: false),
-      InventoryItem(id: 'tshirt_green', name: '초록 티셔츠', isEquipped: false),
-      InventoryItem(id: 'tshirt_flower', name: '꽃무늬 티셔츠', isEquipped: false),
-      InventoryItem(id: 'shirt_white', name: '흰색 셔츠', isEquipped: false),
-    ],
-    '하의': [
-      InventoryItem(id: 'pants_black', name: '검정 바지', isEquipped: false),
-      InventoryItem(id: 'pants_navy', name: '네이비 바지', isEquipped: false),
-      InventoryItem(id: 'pants_gray', name: '회색 바지', isEquipped: false),
-      InventoryItem(id: 'jeans_blue', name: '파란 청바지', isEquipped: false),
-    ],
-    '신발': [
-      InventoryItem(id: 'shoes_black', name: '검정 구두', isEquipped: false),
-      InventoryItem(id: 'shoes_brown', name: '갈색 구두', isEquipped: false),
-      InventoryItem(id: 'sneakers_white', name: '흰색 운동화', isEquipped: false),
-      InventoryItem(id: 'sneakers_black', name: '검정 운동화', isEquipped: false),
-    ],
-  };
+  Map<String, List<GameItem>> _itemsByCategory = {};
+  Set<String> _equippedItemIds = {};
+  bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
+    _loadItems();
+  }
+
+  Future<void> _loadItems() async {
+    print('[InventoryPage] 아이템 로딩 시작');
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final itemRepository = RepositoryProvider.of<ItemRepository>(context, listen: false);
+
+      // 보유 아이템과 착용 아이템 동시 조회
+      final results = await Future.wait([
+        itemRepository.getOwnedItems(),
+        itemRepository.getEquippedItems(),
+      ]);
+
+      final ownedItems = results[0] as List<GameItem>;
+      final equippedItems = results[1] as List<EquippedItem>;
+
+      print('[InventoryPage] 보유 아이템: ${ownedItems.length}개, 착용 아이템: ${equippedItems.length}개');
+
+      // 카테고리별로 그룹핑
+      final itemsByCategory = <String, List<GameItem>>{
+        '얼굴': [],
+        '헤어': [],
+        '상의': [],
+        '하의': [],
+        '신발': [],
+      };
+
+      for (final item in ownedItems) {
+        final category = _getCategoryName(item.type);
+        if (itemsByCategory.containsKey(category)) {
+          itemsByCategory[category]!.add(item);
+        }
+      }
+
+      // 착용 아이템 ID 세트 구성
+      final equippedItemIds = equippedItems.map((item) => item.itemId).toSet();
+
+      setState(() {
+        _itemsByCategory = itemsByCategory;
+        _equippedItemIds = equippedItemIds;
+        _isLoading = false;
+      });
+
+      print('[InventoryPage] 아이템 로딩 완료');
+    } catch (e) {
+      print('[InventoryPage] 아이템 로딩 실패: $e');
+      setState(() {
+        _isLoading = false;
+        _errorMessage = '아이템을 불러오는데 실패했습니다: $e';
+      });
+    }
+  }
+
+  String _getCategoryName(String type) {
+    switch (type) {
+      case 'face':
+        return '얼굴';
+      case 'hair':
+        return '헤어';
+      case 'top':
+        return '상의';
+      case 'bottom':
+        return '하의';
+      case 'shoes':
+        return '신발';
+      default:
+        return type;
+    }
   }
 
   @override
@@ -115,106 +157,140 @@ class _InventoryPageState extends State<InventoryPage> with SingleTickerProvider
           ),
         ),
       ),
-      body: BlocBuilder<PlayerBloc, PlayerState>(
-        builder: (context, state) {
-          // 현재 착용 중인 아이템 업데이트
-          _updateEquippedStatus(state.data);
-
-          return Column(
-            children: [
-              // 캐릭터 미리보기
-              Container(
-                padding: const EdgeInsets.all(16),
-                margin: const EdgeInsets.all(8),
-                child: ClipPath(
-                  clipper: _PixelClipper(notchSize: 6),
-                  child: CustomPaint(
-                    painter: _PixelBorderPainter(
-                      borderColor: Colors.black,
-                      borderWidth: 3,
-                      notchSize: 6,
-                      has3DEffect: true,
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFF4A90E2),
+                strokeWidth: 3,
+              ),
+            )
+          : _errorMessage != null
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                        const SizedBox(height: 16),
+                        Text(
+                          _errorMessage!,
+                          style: const TextStyle(fontSize: 14, color: Colors.red),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: _loadItems,
+                          child: const Text('다시 시도'),
+                        ),
+                      ],
                     ),
-                    child: Container(
-                      color: Colors.white,
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          ClipPath(
-                            clipper: _PixelClipper(notchSize: 3),
+                  ),
+                )
+              : BlocBuilder<PlayerBloc, PlayerState>(
+                  builder: (context, state) {
+                    // 현재 착용 중인 아이템 업데이트
+                    _updateEquippedStatus(state.data);
+
+                    return Column(
+                      children: [
+                        // 캐릭터 미리보기
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          margin: const EdgeInsets.all(8),
+                          child: ClipPath(
+                            clipper: _PixelClipper(notchSize: 6),
                             child: CustomPaint(
                               painter: _PixelBorderPainter(
                                 borderColor: Colors.black,
-                                borderWidth: 2,
-                                notchSize: 3,
+                                borderWidth: 3,
+                                notchSize: 6,
+                                has3DEffect: true,
                               ),
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                color: const Color(0xFF4A90E2),
-                                child: const Text(
-                                  '내 캐릭터',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
+                                color: Colors.white,
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  children: [
+                                    ClipPath(
+                                      clipper: _PixelClipper(notchSize: 3),
+                                      child: CustomPaint(
+                                        painter: _PixelBorderPainter(
+                                          borderColor: Colors.black,
+                                          borderWidth: 2,
+                                          notchSize: 3,
+                                        ),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                          color: const Color(0xFF4A90E2),
+                                          child: const Text(
+                                            '내 캐릭터',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    _CharacterPreview(),
+                                  ],
                                 ),
                               ),
                             ),
                           ),
-                          const SizedBox(height: 12),
-                          _CharacterPreview(),
-                        ],
-                      ),
-                    ),
-                  ),
+                        ),
+                        // 아이템 그리드
+                        Expanded(
+                          child: TabBarView(
+                            controller: _tabController,
+                            children: [
+                              _buildItemGrid('얼굴'),
+                              _buildItemGrid('헤어'),
+                              _buildItemGrid('상의'),
+                              _buildItemGrid('하의'),
+                              _buildItemGrid('신발'),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
-              ),
-              // 아이템 그리드
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildItemGrid('얼굴'),
-                    _buildItemGrid('헤어'),
-                    _buildItemGrid('상의'),
-                    _buildItemGrid('하의'),
-                    _buildItemGrid('신발'),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
-      ),
     );
   }
 
   void _updateEquippedStatus(PlayerData data) {
-    // 얼굴
-    for (var item in _inventoryItems['얼굴']!) {
-      item.isEquipped = item.id == data.faceId;
-    }
-    // 헤어
-    for (var item in _inventoryItems['헤어']!) {
-      item.isEquipped = item.id == data.hairId;
-    }
-    // 상의
-    for (var item in _inventoryItems['상의']!) {
-      item.isEquipped = item.id == data.topId;
-    }
-    // 하의
-    for (var item in _inventoryItems['하의']!) {
-      item.isEquipped = item.id == data.bottomId;
-    }
-    // 신발
-    for (var item in _inventoryItems['신발']!) {
-      item.isEquipped = item.id == data.shoesId;
+    // PlayerBloc의 state를 기반으로 착용 중인 아이템 ID를 업데이트
+    final newEquippedIds = {
+      data.faceId,
+      data.hairId,
+      data.topId,
+      data.bottomId,
+      data.shoesId,
+    };
+
+    if (!_equippedItemIds.containsAll(newEquippedIds) ||
+        !newEquippedIds.containsAll(_equippedItemIds)) {
+      setState(() {
+        _equippedItemIds = newEquippedIds;
+      });
     }
   }
 
   Widget _buildItemGrid(String category) {
-    final items = _inventoryItems[category] ?? [];
+    final items = _itemsByCategory[category] ?? [];
+
+    if (items.isEmpty) {
+      return Center(
+        child: Text(
+          '보유한 $category 아이템이 없습니다',
+          style: const TextStyle(fontSize: 14, color: Colors.grey),
+        ),
+      );
+    }
 
     return GridView.builder(
       padding: const EdgeInsets.all(16),
@@ -232,27 +308,28 @@ class _InventoryPageState extends State<InventoryPage> with SingleTickerProvider
     );
   }
 
-  Widget _buildItemCard(InventoryItem item, String category) {
+  Widget _buildItemCard(GameItem item, String category) {
     final playerBloc = context.read<PlayerBloc>();
+    final isEquipped = _equippedItemIds.contains(item.itemId);
 
     return GestureDetector(
       onTap: () {
         // 착용
         switch (category) {
           case '얼굴':
-            playerBloc.add(PlayerEvent.faceChanged(item.id));
+            playerBloc.add(PlayerEvent.faceChanged(item.itemId));
             break;
           case '헤어':
-            playerBloc.add(PlayerEvent.hairChanged(item.id));
+            playerBloc.add(PlayerEvent.hairChanged(item.itemId));
             break;
           case '상의':
-            playerBloc.add(PlayerEvent.topChanged(item.id));
+            playerBloc.add(PlayerEvent.topChanged(item.itemId));
             break;
           case '하의':
-            playerBloc.add(PlayerEvent.bottomChanged(item.id));
+            playerBloc.add(PlayerEvent.bottomChanged(item.itemId));
             break;
           case '신발':
-            playerBloc.add(PlayerEvent.shoesChanged(item.id));
+            playerBloc.add(PlayerEvent.shoesChanged(item.itemId));
             break;
         }
         _showEquipSnackBar(item);
@@ -261,13 +338,13 @@ class _InventoryPageState extends State<InventoryPage> with SingleTickerProvider
         clipper: _PixelClipper(notchSize: 4),
         child: CustomPaint(
           painter: _PixelBorderPainter(
-            borderColor: item.isEquipped ? const Color(0xFF4A90E2) : Colors.black,
-            borderWidth: item.isEquipped ? 4 : 3,
+            borderColor: isEquipped ? const Color(0xFF4A90E2) : Colors.black,
+            borderWidth: isEquipped ? 4 : 3,
             notchSize: 4,
             has3DEffect: true,
           ),
           child: Container(
-            color: item.isEquipped ? const Color(0xFFE6F2FF) : Colors.white,
+            color: isEquipped ? const Color(0xFFE6F2FF) : Colors.white,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -286,7 +363,7 @@ class _InventoryPageState extends State<InventoryPage> with SingleTickerProvider
                       height: 64,
                       color: const Color(0xFFF0F0F0),
                       child: _ItemIconPreview(
-                        item: item,
+                        itemId: item.itemId,
                         category: category,
                       ),
                     ),
@@ -310,7 +387,7 @@ class _InventoryPageState extends State<InventoryPage> with SingleTickerProvider
                 ),
                 const SizedBox(height: 4),
                 // 착용 상태
-                if (item.isEquipped)
+                if (isEquipped)
                   ClipPath(
                     clipper: _PixelClipper(notchSize: 2),
                     child: CustomPaint(
@@ -342,7 +419,7 @@ class _InventoryPageState extends State<InventoryPage> with SingleTickerProvider
     );
   }
 
-  void _showEquipSnackBar(InventoryItem item) {
+  void _showEquipSnackBar(GameItem item) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -365,18 +442,6 @@ class _InventoryPageState extends State<InventoryPage> with SingleTickerProvider
       ),
     );
   }
-}
-
-class InventoryItem {
-  final String id;
-  final String name;
-  bool isEquipped;
-
-  InventoryItem({
-    required this.id,
-    required this.name,
-    required this.isEquipped,
-  });
 }
 
 /// 픽셀 스타일 모서리를 만드는 커스텀 클리퍼
@@ -503,11 +568,11 @@ class _PixelBorderPainter extends CustomPainter {
 
 /// 아이템 아이콘 미리보기
 class _ItemIconPreview extends StatefulWidget {
-  final InventoryItem item;
+  final String itemId;
   final String category;
 
   const _ItemIconPreview({
-    required this.item,
+    required this.itemId,
     required this.category,
   });
 
@@ -528,22 +593,22 @@ class _ItemIconPreviewState extends State<_ItemIconPreview> {
   @override
   void didUpdateWidget(_ItemIconPreview oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.item.id != widget.item.id) {
+    if (oldWidget.itemId != widget.itemId) {
       _loadItemImage();
     }
   }
 
   Future<void> _loadItemImage() async {
-    if (_lastItemId == widget.item.id && _cachedImage != null) {
+    if (_lastItemId == widget.itemId && _cachedImage != null) {
       return;
     }
 
-    _lastItemId = widget.item.id;
+    _lastItemId = widget.itemId;
 
     try {
       final image = await _generateSinglePartImage(
         category: widget.category,
-        itemId: widget.item.id,
+        itemId: widget.itemId,
       );
 
       if (mounted) {
