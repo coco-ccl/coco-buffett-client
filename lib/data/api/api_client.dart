@@ -131,10 +131,10 @@ class ApiClient {
   }
 
   /// 아이템 리스트 조회
-  /// GET /cocobuffet/v1/items
+  /// GET /cocobuffett/v1/items/list
   Future<ApiResponse<List<ItemResponse>>> getItems() async {
     try {
-      final response = await _dio.get('/cocobuffet/v1/items');
+      final response = await _dio.get('/cocobuffett/v1/items/list');
 
       return ApiResponse.fromJson(
         response.data,
@@ -165,10 +165,10 @@ class ApiClient {
   }
 
   /// 현재 착용한 아이템 조회
-  /// GET /cocobuffet/v1/items/equipped
+  /// GET /cocobuffett/v1/items/equipped
   Future<ApiResponse<List<EquippedItemResponse>>> getEquippedItems() async {
     try {
-      final response = await _dio.get('/cocobuffet/v1/items/equipped');
+      final response = await _dio.get('/cocobuffett/v1/items/equipped');
 
       return ApiResponse.fromJson(
         response.data,

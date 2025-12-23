@@ -6,11 +6,12 @@ part 'item_response.g.dart';
 @JsonSerializable()
 class ItemResponse {
   @JsonKey(name: 'item_id')
-  final int itemId; // 아이템 ID
+  final String itemId; // 아이템 ID (스프라이트 ID)
 
   final String type; // 종류 (top, bottom, face, hair, shoes)
-  final String color; // 아이템 색상
+  final String name; // 아이템 이름 (한글)
   final int price; // 가격 (원)
+  final String color; // 아이템 색상 (메타데이터)
 
   @JsonKey(name: 'is_owned')
   final bool isOwned; // 보유 여부
@@ -18,8 +19,9 @@ class ItemResponse {
   ItemResponse({
     required this.itemId,
     required this.type,
-    required this.color,
+    required this.name,
     required this.price,
+    required this.color,
     required this.isOwned,
   });
 

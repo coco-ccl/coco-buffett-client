@@ -11,21 +11,29 @@ class ItemRepository {
     ApiClient? apiClient,
     bool useMockData = true,
   })  : _apiClient = apiClient ?? ApiClient(),
-        _useMockData = useMockData;
+        _useMockData = useMockData {
+    print('[ItemRepository] 생성됨 - useMockData: $_useMockData');
+  }
 
   /// 아이템 리스트 조회
   Future<List<GameItem>> getItems() async {
+    print('[ItemRepository] 아이템 리스트 조회 시작');
+
     if (_useMockData) {
+      print('[ItemRepository] Mock 데이터 반환');
       return _getMockItems();
     }
 
     final response = await _apiClient.getItems();
     if (response.code == 0 && response.data != null) {
-      return response.data!
+      final items = response.data!
           .map((dto) => _convertToGameItem(dto))
           .toList();
+      print('[ItemRepository] 아이템 ${items.length}개 조회 성공');
+      return items;
     }
 
+    print('[ItemRepository] 아이템 조회 실패: ${response.message}');
     throw Exception('Failed to load items');
   }
 
@@ -47,33 +55,45 @@ class ItemRepository {
 
   /// 현재 착용한 아이템 조회
   Future<List<EquippedItem>> getEquippedItems() async {
+    print('[ItemRepository] 착용 아이템 조회 시작');
+
     if (_useMockData) {
+      print('[ItemRepository] Mock 착용 아이템 반환');
       return _getMockEquippedItems();
     }
 
     final response = await _apiClient.getEquippedItems();
     if (response.code == 0 && response.data != null) {
-      return response.data!
+      final items = response.data!
           .map((dto) => _convertToEquippedItem(dto))
           .toList();
+      print('[ItemRepository] 착용 아이템 ${items.length}개 조회 성공');
+      return items;
     }
 
+    print('[ItemRepository] 착용 아이템 조회 실패: ${response.message}');
     throw Exception('Failed to load equipped items');
   }
 
   /// 아이템 구매
   Future<int> purchaseItem(int itemId) async {
+    print('[ItemRepository] 아이템 구매 시작: itemId=$itemId');
+
     if (_useMockData) {
       // Mock 모드: 임의의 잔여 예치금 반환
       await Future.delayed(const Duration(milliseconds: 500));
+      print('[ItemRepository] 아이템 구매 성공 (Mock): 잔여금=85000');
       return 85000; // Mock 잔여 예치금
     }
 
     final response = await _apiClient.purchaseItem(itemId);
     if (response.code == 0 && response.data != null) {
-      return response.data!.remainingDeposit;
+      final remaining = response.data!.remainingDeposit;
+      print('[ItemRepository] 아이템 구매 성공: 잔여금=$remaining');
+      return remaining;
     }
 
+    print('[ItemRepository] 아이템 구매 실패: ${response.message}');
     throw Exception(response.message);
   }
 
@@ -82,8 +102,9 @@ class ItemRepository {
     return GameItem(
       itemId: response.itemId,
       type: response.type,
-      color: response.color,
+      name: response.name,
       price: response.price,
+      color: response.color,
       isOwned: response.isOwned,
     );
   }
@@ -101,29 +122,39 @@ class ItemRepository {
   List<GameItem> _getMockItems() {
     return const [
       // 얼굴 (face)
-      GameItem(itemId: 1, type: 'face', color: 'default', price: 0, isOwned: true),
-      GameItem(itemId: 2, type: 'face', color: 'happy', price: 500, isOwned: false),
+      GameItem(itemId: 'default', type: 'face', name: '기본', color: 'default', price: 0, isOwned: true),
+      GameItem(itemId: 'cute', type: 'face', name: '귀여움', color: 'pink', price: 100, isOwned: false),
+      GameItem(itemId: 'cool', type: 'face', name: '멋짐', color: 'blue', price: 100, isOwned: false),
 
       // 머리 (hair)
-      GameItem(itemId: 10, type: 'hair', color: 'black', price: 0, isOwned: true),
-      GameItem(itemId: 11, type: 'hair', color: 'brown', price: 300, isOwned: false),
-      GameItem(itemId: 12, type: 'hair', color: 'blonde', price: 300, isOwned: false),
+      GameItem(itemId: 'short_brown', type: 'hair', name: '짧은 갈색', color: 'brown', price: 0, isOwned: true),
+      GameItem(itemId: 'short_black', type: 'hair', name: '짧은 검정', color: 'black', price: 150, isOwned: false),
+      GameItem(itemId: 'short_blonde', type: 'hair', name: '짧은 금발', color: 'blonde', price: 150, isOwned: false),
+      GameItem(itemId: 'long_brown', type: 'hair', name: '긴 갈색', color: 'brown', price: 200, isOwned: false),
+      GameItem(itemId: 'long_black', type: 'hair', name: '긴 검정', color: 'black', price: 200, isOwned: false),
+      GameItem(itemId: 'pomade_black', type: 'hair', name: '포마드 검정', color: 'black', price: 250, isOwned: false),
+      GameItem(itemId: 'pomade_brown', type: 'hair', name: '포마드 갈색', color: 'brown', price: 250, isOwned: false),
+      GameItem(itemId: 'gray', type: 'hair', name: '회색', color: 'gray', price: 300, isOwned: false),
 
       // 상의 (top)
-      GameItem(itemId: 20, type: 'top', color: 'white', price: 0, isOwned: true),
-      GameItem(itemId: 21, type: 'top', color: 'green', price: 500, isOwned: false),
-      GameItem(itemId: 22, type: 'top', color: 'blue', price: 500, isOwned: false),
-      GameItem(itemId: 23, type: 'top', color: 'red', price: 800, isOwned: false),
+      GameItem(itemId: 'tshirt_white', type: 'top', name: '흰색 티셔츠', color: 'white', price: 0, isOwned: true),
+      GameItem(itemId: 'tshirt_blue', type: 'top', name: '파란 티셔츠', color: 'blue', price: 100, isOwned: false),
+      GameItem(itemId: 'tshirt_red', type: 'top', name: '빨간 티셔츠', color: 'red', price: 100, isOwned: false),
+      GameItem(itemId: 'tshirt_green', type: 'top', name: '초록 티셔츠', color: 'green', price: 100, isOwned: false),
+      GameItem(itemId: 'tshirt_flower', type: 'top', name: '꽃무늬 티셔츠', color: 'flower', price: 200, isOwned: false),
+      GameItem(itemId: 'shirt_white', type: 'top', name: '흰색 셔츠', color: 'white', price: 250, isOwned: false),
 
       // 하의 (bottom)
-      GameItem(itemId: 30, type: 'bottom', color: 'blue', price: 0, isOwned: true),
-      GameItem(itemId: 31, type: 'bottom', color: 'black', price: 800, isOwned: false),
-      GameItem(itemId: 32, type: 'bottom', color: 'gray', price: 600, isOwned: false),
+      GameItem(itemId: 'pants_black', type: 'bottom', name: '검정 바지', color: 'black', price: 0, isOwned: true),
+      GameItem(itemId: 'pants_navy', type: 'bottom', name: '네이비 바지', color: 'navy', price: 150, isOwned: false),
+      GameItem(itemId: 'pants_gray', type: 'bottom', name: '회색 바지', color: 'gray', price: 150, isOwned: false),
+      GameItem(itemId: 'jeans_blue', type: 'bottom', name: '파란 청바지', color: 'blue', price: 200, isOwned: false),
 
       // 신발 (shoes)
-      GameItem(itemId: 40, type: 'shoes', color: 'white', price: 0, isOwned: true),
-      GameItem(itemId: 41, type: 'shoes', color: 'black', price: 400, isOwned: false),
-      GameItem(itemId: 42, type: 'shoes', color: 'red', price: 600, isOwned: false),
+      GameItem(itemId: 'shoes_black', type: 'shoes', name: '검정 구두', color: 'black', price: 0, isOwned: true),
+      GameItem(itemId: 'shoes_brown', type: 'shoes', name: '갈색 구두', color: 'brown', price: 150, isOwned: false),
+      GameItem(itemId: 'sneakers_white', type: 'shoes', name: '흰색 운동화', color: 'white', price: 200, isOwned: false),
+      GameItem(itemId: 'sneakers_black', type: 'shoes', name: '검정 운동화', color: 'black', price: 200, isOwned: false),
     ];
   }
 
@@ -135,35 +166,37 @@ class ItemRepository {
   /// Mock 데이터 반환 - 착용한 아이템
   List<EquippedItem> _getMockEquippedItems() {
     return const [
-      EquippedItem(itemId: 1, type: 'face', color: 'default'),
-      EquippedItem(itemId: 10, type: 'hair', color: 'black'),
-      EquippedItem(itemId: 20, type: 'top', color: 'white'),
-      EquippedItem(itemId: 30, type: 'bottom', color: 'blue'),
-      EquippedItem(itemId: 40, type: 'shoes', color: 'white'),
+      EquippedItem(itemId: 'default', type: 'face', color: 'default'),
+      EquippedItem(itemId: 'short_brown', type: 'hair', color: 'brown'),
+      EquippedItem(itemId: 'tshirt_white', type: 'top', color: 'white'),
+      EquippedItem(itemId: 'pants_black', type: 'bottom', color: 'black'),
+      EquippedItem(itemId: 'shoes_black', type: 'shoes', color: 'black'),
     ];
   }
 }
 
 /// 게임 아이템 도메인 모델
 class GameItem {
-  final int itemId;
+  final String itemId; // 스프라이트 ID (예: "cool", "cute", "default")
   final String type; // face, hair, top, bottom, shoes
-  final String color;
+  final String name; // 한글 이름 (예: "멋짐", "귀여움")
   final int price; // 가격 (원)
+  final String color; // 색상 메타데이터 (예: "blue", "pink")
   final bool isOwned; // 보유 여부
 
   const GameItem({
     required this.itemId,
     required this.type,
-    required this.color,
+    required this.name,
     required this.price,
+    required this.color,
     required this.isOwned,
   });
 }
 
 /// 착용 아이템 도메인 모델
 class EquippedItem {
-  final int itemId;
+  final String itemId; // 스프라이트 ID
   final String type; // face, hair, top, bottom, shoes
   final String color;
 

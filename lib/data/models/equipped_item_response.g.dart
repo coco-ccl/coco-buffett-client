@@ -9,7 +9,7 @@ part of 'equipped_item_response.dart';
 EquippedItemResponse _$EquippedItemResponseFromJson(
   Map<String, dynamic> json,
 ) => EquippedItemResponse(
-  itemId: (json['itemId'] as num).toInt(),
+  itemId: json['item_id'] as String,
   type: json['type'] as String,
   color: json['color'] as String,
 );
@@ -17,7 +17,7 @@ EquippedItemResponse _$EquippedItemResponseFromJson(
 Map<String, dynamic> _$EquippedItemResponseToJson(
   EquippedItemResponse instance,
 ) => <String, dynamic>{
-  'itemId': instance.itemId,
+  'item_id': instance.itemId,
   'type': instance.type,
   'color': instance.color,
 };
