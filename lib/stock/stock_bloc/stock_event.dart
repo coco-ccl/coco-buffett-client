@@ -15,4 +15,7 @@ sealed class StockEvent with _$StockEvent {
   const factory StockEvent.triggerEvent(models.StockEventModel event) = _TriggerEvent;
   const factory StockEvent.clearEvent() = _ClearEvent;
   const factory StockEvent.selectStock(String symbol) = _SelectStock;
+  const factory StockEvent.stocksUpdated(List<Stock> stocks) = _StocksUpdated;
+  const factory StockEvent.cashUpdated(int cash) = _CashUpdated;
+  const factory StockEvent.portfolioUpdated(List<asset.Stock> assetStocks) = _PortfolioUpdated;
 }

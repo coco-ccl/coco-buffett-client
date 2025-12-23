@@ -1,32 +1,58 @@
+import 'dart:async';
 import '../api/api_client.dart';
 import '../models/tradable_stock_response.dart';
 import '../models/trade_stock_request.dart';
 
-/// Stock Repository - 거래 가능 주식 데이터 관리
+/// Stock Repository - 거래 가능 주식 데이터 관리 (Stream 기반 캐싱 및 폴링)
 class StockRepository {
   final ApiClient _apiClient;
   final bool _useMockData;
+  final Duration pollingInterval;
+
+  // Private 캐시 변수
+  List<TradableStock> _tradableStocks = [];
+
+  // StreamController
+  final _tradableStocksController = StreamController<List<TradableStock>>.broadcast();
+
+  // Public Streams
+  Stream<List<TradableStock>> get tradableStocksStream => _tradableStocksController.stream;
+
+  // Current values (Synchronous access)
+  List<TradableStock> get tradableStocks => List.unmodifiable(_tradableStocks);
+
+  // 폴링 타이머
+  Timer? _pollingTimer;
 
   StockRepository({
     ApiClient? apiClient,
     bool useMockData = true,
+    this.pollingInterval = const Duration(seconds: 5), // 기본 5초마다 폴링
   })  : _apiClient = apiClient ?? ApiClient(),
         _useMockData = useMockData;
 
-  /// 거래 가능 주식 리스트 조회
+  /// 거래 가능 주식 리스트 조회 (캐시 업데이트 포함)
   Future<List<TradableStock>> getTradableStocks() async {
+    List<TradableStock> stocks;
+
     if (_useMockData) {
-      return _getMockTradableStocks();
+      stocks = _getMockTradableStocks();
+    } else {
+      final response = await _apiClient.getTradableStocks();
+      if (response.code == 0 && response.data != null) {
+        stocks = response.data!
+            .map((dto) => _convertToTradableStock(dto))
+            .toList();
+      } else {
+        throw Exception('Failed to load tradable stocks');
+      }
     }
 
-    final response = await _apiClient.getTradableStocks();
-    if (response.code == 0 && response.data != null) {
-      return response.data!
-          .map((dto) => _convertToTradableStock(dto))
-          .toList();
-    }
+    // 캐시 업데이트 및 Stream emit
+    _tradableStocks = stocks;
+    _tradableStocksController.add(List.from(_tradableStocks));
 
-    throw Exception('Failed to load tradable stocks');
+    return stocks;
   }
 
   /// DTO를 도메인 모델로 변환
@@ -126,6 +152,44 @@ class StockRepository {
         currentPrice: 140000,
       ),
     ];
+  }
+
+  /// 초기화 (데이터 로드 및 폴링 시작)
+  Future<void> initialize() async {
+    // getTradableStocks가 캐시 업데이트 및 Stream emit을 수행함
+    await getTradableStocks();
+
+    // 폴링 시작
+    startPolling();
+  }
+
+  /// 폴링 시작
+  void startPolling() {
+    // 이미 실행 중이면 중복 실행 방지
+    if (_pollingTimer != null && _pollingTimer!.isActive) {
+      return;
+    }
+
+    _pollingTimer = Timer.periodic(pollingInterval, (_) async {
+      try {
+        await getTradableStocks();
+      } catch (e) {
+        // 폴링 중 에러 발생해도 계속 실행
+        print('Stock polling error: $e');
+      }
+    });
+  }
+
+  /// 폴링 중지
+  void stopPolling() {
+    _pollingTimer?.cancel();
+    _pollingTimer = null;
+  }
+
+  /// 리소스 정리
+  void dispose() {
+    stopPolling();
+    _tradableStocksController.close();
   }
 }
 

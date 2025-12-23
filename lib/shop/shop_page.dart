@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../asset/asset_bloc/asset_bloc.dart';
+import '../shop/shop_bloc/shop_bloc.dart';
 import '../game/player_bloc/player_bloc.dart';
 import '../game/sprite_layers.dart';
 import '../game/sprites/bottom.dart';
@@ -95,6 +95,30 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
     }
   }
 
+  /// PlayerBloc 상태로부터 착용 중인 아이템 ID 업데이트
+  void _updateEquippedIdsFromPlayerState(PlayerData playerData) {
+    final newEquippedIds = {
+      playerData.faceId,
+      playerData.hairId,
+      playerData.topId,
+      playerData.bottomId,
+      playerData.shoesId,
+    };
+
+    // 변경사항이 있을 때만 setState 호출 (무한 루프 방지)
+    if (!_equippedItemIds.containsAll(newEquippedIds) ||
+        !newEquippedIds.containsAll(_equippedItemIds)) {
+      // build 중에는 setState를 호출할 수 없으므로 post frame callback 사용
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _equippedItemIds = newEquippedIds;
+          });
+        }
+      });
+    }
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -114,9 +138,13 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
         ),
         actions: [
           // 자산 표시
-          BlocBuilder<AssetBloc, AssetState>(
+          BlocBuilder<ShopBloc, ShopState>(
             builder: (context, state) {
               final numberFormat = NumberFormat('#,###');
+              final cash = state.maybeWhen(
+                loaded: (currentCash, _, __, ___) => currentCash,
+                orElse: () => 0,
+              );
               return Container(
                 margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -130,7 +158,7 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
                     const Icon(Icons.monetization_on, color: Color(0xFFFFD700), size: 20),
                     const SizedBox(width: 6),
                     Text(
-                      '${numberFormat.format(state.data.deposit)} G',
+                      '${numberFormat.format(cash)} G',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -214,6 +242,9 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
               : BlocBuilder<PlayerBloc, PlayerState>(
                   builder: (context, state) {
                     final playerBloc = context.read<PlayerBloc>();
+
+                    // PlayerBloc 상태 변경 시 착용 중인 아이템 ID 업데이트
+                    _updateEquippedIdsFromPlayerState(state.data);
 
                     return Column(
                       children: [
@@ -455,14 +486,20 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
     );
   }
 
-  void _handleItemSelect(BuildContext context, GameItem item, void Function(GameItem) onSelect) {
-    final assetBloc = context.read<AssetBloc>();
+  void _handleItemSelect(BuildContext context, GameItem item, void Function(GameItem) onSelect) async {
+    final shopBloc = context.read<ShopBloc>();
     final isOwned = item.isOwned;
 
     // 미보유 아이템인 경우 구매 처리
     if (!isOwned) {
+      // ShopBloc 상태에서 현금 확인
+      final currentCash = shopBloc.state.maybeWhen(
+        loaded: (cash, _, __, ___) => cash,
+        orElse: () => 0,
+      );
+
       // 잔액 확인
-      if (assetBloc.state.data.deposit < item.price) {
+      if (currentCash < item.price) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Row(
@@ -483,20 +520,15 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
         return;
       }
 
-      // 아이템 구매
-      assetBloc.add(AssetEvent.itemPurchased(
-        itemName: item.name,
-        price: item.price,
-      ));
+      // TODO: 아이템 구매 로직 구현 필요
+      // ItemRepository를 통한 구매 API 호출 필요
+      // 지금은 일단 스킵하고 착용만 진행
     }
 
-    // 아이템 착용
+    // 아이템 착용 (PlayerBloc에 이벤트 전송)
     onSelect(item);
 
-    // 착용한 아이템 ID를 equippedItemIds에 추가
-    setState(() {
-      _equippedItemIds.add(item.itemId);
-    });
+    // _equippedItemIds는 PlayerBloc 상태 변경을 통해 자동 업데이트됨
 
     _showPurchaseSnackBar(item, isOwned);
   }

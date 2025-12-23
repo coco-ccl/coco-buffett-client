@@ -1,11 +1,26 @@
+import 'dart:async';
 import '../api/api_client.dart';
 import '../models/item_response.dart';
 import '../models/equipped_item_response.dart';
 
-/// Item Repository - 아이템 데이터 관리
+/// Item Repository - 아이템 데이터 관리 (Stream 기반 캐싱 포함)
 class ItemRepository {
   final ApiClient _apiClient;
   final bool _useMockData;
+
+  // Private 캐시 변수
+  List<GameItem> _allItems = [];
+  List<GameItem> _ownedItems = [];
+
+  // StreamController
+  final _ownedItemsController = StreamController<List<GameItem>>.broadcast();
+
+  // Public Streams
+  Stream<List<GameItem>> get ownedItemsStream => _ownedItemsController.stream;
+
+  // Current values (Synchronous access)
+  List<GameItem> get ownedItems => List.unmodifiable(_ownedItems);
+  List<GameItem> get allItems => List.unmodifiable(_allItems);
 
   ItemRepository({
     ApiClient? apiClient,
@@ -15,42 +30,56 @@ class ItemRepository {
     print('[ItemRepository] 생성됨 - useMockData: $_useMockData');
   }
 
-  /// 아이템 리스트 조회
+  /// 아이템 리스트 조회 (캐시 업데이트 포함)
   Future<List<GameItem>> getItems() async {
     print('[ItemRepository] 아이템 리스트 조회 시작');
 
+    List<GameItem> items;
+
     if (_useMockData) {
       print('[ItemRepository] Mock 데이터 반환');
-      return _getMockItems();
+      items = _getMockItems();
+    } else {
+      final response = await _apiClient.getItems();
+      if (response.code == 0 && response.data != null) {
+        items = response.data!
+            .map((dto) => _convertToGameItem(dto))
+            .toList();
+        print('[ItemRepository] 아이템 ${items.length}개 조회 성공');
+      } else {
+        print('[ItemRepository] 아이템 조회 실패: ${response.message}');
+        throw Exception('Failed to load items');
+      }
     }
 
-    final response = await _apiClient.getItems();
-    if (response.code == 0 && response.data != null) {
-      final items = response.data!
-          .map((dto) => _convertToGameItem(dto))
-          .toList();
-      print('[ItemRepository] 아이템 ${items.length}개 조회 성공');
-      return items;
-    }
+    // 캐시 업데이트
+    _allItems = items;
 
-    print('[ItemRepository] 아이템 조회 실패: ${response.message}');
-    throw Exception('Failed to load items');
+    return items;
   }
 
-  /// 내가 보유한 아이템 조회
+  /// 내가 보유한 아이템 조회 (캐시 업데이트 포함)
   Future<List<GameItem>> getOwnedItems() async {
+    List<GameItem> items;
+
     if (_useMockData) {
-      return _getMockOwnedItems();
+      items = _getMockOwnedItems();
+    } else {
+      final response = await _apiClient.getOwnedItems();
+      if (response.code == 0 && response.data != null) {
+        items = response.data!
+            .map((dto) => _convertToGameItem(dto))
+            .toList();
+      } else {
+        throw Exception('Failed to load owned items');
+      }
     }
 
-    final response = await _apiClient.getOwnedItems();
-    if (response.code == 0 && response.data != null) {
-      return response.data!
-          .map((dto) => _convertToGameItem(dto))
-          .toList();
-    }
+    // 캐시 업데이트 및 Stream emit
+    _ownedItems = items;
+    _ownedItemsController.add(List.from(_ownedItems));
 
-    throw Exception('Failed to load owned items');
+    return items;
   }
 
   /// 현재 착용한 아이템 조회
@@ -75,8 +104,8 @@ class ItemRepository {
     throw Exception('Failed to load equipped items');
   }
 
-  /// 아이템 구매
-  Future<int> purchaseItem(int itemId) async {
+  /// 아이템 구매 (API 호출만)
+  Future<int> _purchaseItemAPI(int itemId) async {
     print('[ItemRepository] 아이템 구매 시작: itemId=$itemId');
 
     if (_useMockData) {
@@ -95,6 +124,35 @@ class ItemRepository {
 
     print('[ItemRepository] 아이템 구매 실패: ${response.message}');
     throw Exception(response.message);
+  }
+
+  /// 아이템 구매 (Public API - 기존 코드 호환성 유지)
+  Future<int> purchaseItem(int itemId) async {
+    return _purchaseItemAPI(itemId);
+  }
+
+  /// 아이템 구매 (캐시 업데이트 포함)
+  Future<bool> purchaseItemWithCache(String itemId) async {
+    // 이미 보유한 아이템인지 확인
+    if (_ownedItems.any((item) => item.itemId == itemId)) {
+      return false;
+    }
+
+    // 전체 아이템에서 찾기
+    final item = _allItems.firstWhere(
+      (item) => item.itemId == itemId,
+      orElse: () => throw Exception('Item not found'),
+    );
+
+    // API 호출 (itemId를 int로 변환 필요 - 임시로 price 사용하거나 별도 처리 필요)
+    // TODO: API가 itemId를 String으로 받도록 수정 필요
+    // await _purchaseItemAPI(itemId);
+
+    // 캐시 업데이트
+    _ownedItems.add(item.copyWith(isOwned: true));
+    _ownedItemsController.add(List.from(_ownedItems));
+
+    return true;
   }
 
   /// DTO를 도메인 모델로 변환
@@ -206,6 +264,23 @@ class ItemRepository {
       EquippedItem(itemId: 'shoes_black', type: 'shoes', color: 'black'),
     ];
   }
+
+  /// 초기화 (서버에서 데이터 로드 후 캐시 설정)
+  Future<void> initialize() async {
+    // getItems()가 _allItems를 업데이트함
+    await getItems();
+
+    // allItems에서 보유한 아이템만 필터링
+    _ownedItems = _allItems.where((item) => item.isOwned).toList();
+
+    // 초기값 emit
+    _ownedItemsController.add(List.from(_ownedItems));
+  }
+
+  /// 리소스 정리
+  void dispose() {
+    _ownedItemsController.close();
+  }
 }
 
 /// 게임 아이템 도메인 모델
@@ -225,6 +300,25 @@ class GameItem {
     required this.color,
     required this.isOwned,
   });
+
+  /// copyWith 메서드
+  GameItem copyWith({
+    String? itemId,
+    String? type,
+    String? name,
+    String? color,
+    int? price,
+    bool? isOwned,
+  }) {
+    return GameItem(
+      itemId: itemId ?? this.itemId,
+      type: type ?? this.type,
+      name: name ?? this.name,
+      color: color ?? this.color,
+      price: price ?? this.price,
+      isOwned: isOwned ?? this.isOwned,
+    );
+  }
 }
 
 /// 착용 아이템 도메인 모델

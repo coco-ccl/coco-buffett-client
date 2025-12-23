@@ -22,6 +22,7 @@ abstract class Stock with _$Stock {
     required String name, // 주식 이름
     required String ticker, // 주식 티커
     required int quantity, // 보유 수량 (주)
+    @Default(0) int avgPrice, // 평균 매수가 (원)
   }) = _Stock;
 }
 

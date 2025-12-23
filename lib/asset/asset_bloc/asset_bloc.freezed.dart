@@ -55,13 +55,16 @@ extension AssetEventPatterns on AssetEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _DepositChanged value)?  depositChanged,TResult Function( _ItemPurchased value)?  itemPurchased,TResult Function( _BalanceAdded value)?  balanceAdded,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Started value)?  started,TResult Function( _DepositChanged value)?  depositChanged,TResult Function( _ItemPurchased value)?  itemPurchased,TResult Function( _BalanceAdded value)?  balanceAdded,TResult Function( _CashUpdated value)?  cashUpdated,TResult Function( _StocksUpdated value)?  stocksUpdated,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _DepositChanged() when depositChanged != null:
+case _Started() when started != null:
+return started(_that);case _DepositChanged() when depositChanged != null:
 return depositChanged(_that);case _ItemPurchased() when itemPurchased != null:
 return itemPurchased(_that);case _BalanceAdded() when balanceAdded != null:
-return balanceAdded(_that);case _:
+return balanceAdded(_that);case _CashUpdated() when cashUpdated != null:
+return cashUpdated(_that);case _StocksUpdated() when stocksUpdated != null:
+return stocksUpdated(_that);case _:
   return orElse();
 
 }
@@ -79,13 +82,16 @@ return balanceAdded(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _DepositChanged value)  depositChanged,required TResult Function( _ItemPurchased value)  itemPurchased,required TResult Function( _BalanceAdded value)  balanceAdded,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Started value)  started,required TResult Function( _DepositChanged value)  depositChanged,required TResult Function( _ItemPurchased value)  itemPurchased,required TResult Function( _BalanceAdded value)  balanceAdded,required TResult Function( _CashUpdated value)  cashUpdated,required TResult Function( _StocksUpdated value)  stocksUpdated,}){
 final _that = this;
 switch (_that) {
-case _DepositChanged():
+case _Started():
+return started(_that);case _DepositChanged():
 return depositChanged(_that);case _ItemPurchased():
 return itemPurchased(_that);case _BalanceAdded():
-return balanceAdded(_that);}
+return balanceAdded(_that);case _CashUpdated():
+return cashUpdated(_that);case _StocksUpdated():
+return stocksUpdated(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -99,13 +105,16 @@ return balanceAdded(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _DepositChanged value)?  depositChanged,TResult? Function( _ItemPurchased value)?  itemPurchased,TResult? Function( _BalanceAdded value)?  balanceAdded,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Started value)?  started,TResult? Function( _DepositChanged value)?  depositChanged,TResult? Function( _ItemPurchased value)?  itemPurchased,TResult? Function( _BalanceAdded value)?  balanceAdded,TResult? Function( _CashUpdated value)?  cashUpdated,TResult? Function( _StocksUpdated value)?  stocksUpdated,}){
 final _that = this;
 switch (_that) {
-case _DepositChanged() when depositChanged != null:
+case _Started() when started != null:
+return started(_that);case _DepositChanged() when depositChanged != null:
 return depositChanged(_that);case _ItemPurchased() when itemPurchased != null:
 return itemPurchased(_that);case _BalanceAdded() when balanceAdded != null:
-return balanceAdded(_that);case _:
+return balanceAdded(_that);case _CashUpdated() when cashUpdated != null:
+return cashUpdated(_that);case _StocksUpdated() when stocksUpdated != null:
+return stocksUpdated(_that);case _:
   return null;
 
 }
@@ -122,12 +131,15 @@ return balanceAdded(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int amount)?  depositChanged,TResult Function( String itemName,  int price)?  itemPurchased,TResult Function( int amount)?  balanceAdded,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  started,TResult Function( int amount)?  depositChanged,TResult Function( String itemName,  int price)?  itemPurchased,TResult Function( int amount)?  balanceAdded,TResult Function( int cash)?  cashUpdated,TResult Function( List<Stock> stocks)?  stocksUpdated,required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _DepositChanged() when depositChanged != null:
+case _Started() when started != null:
+return started();case _DepositChanged() when depositChanged != null:
 return depositChanged(_that.amount);case _ItemPurchased() when itemPurchased != null:
 return itemPurchased(_that.itemName,_that.price);case _BalanceAdded() when balanceAdded != null:
-return balanceAdded(_that.amount);case _:
+return balanceAdded(_that.amount);case _CashUpdated() when cashUpdated != null:
+return cashUpdated(_that.cash);case _StocksUpdated() when stocksUpdated != null:
+return stocksUpdated(_that.stocks);case _:
   return orElse();
 
 }
@@ -145,12 +157,15 @@ return balanceAdded(_that.amount);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int amount)  depositChanged,required TResult Function( String itemName,  int price)  itemPurchased,required TResult Function( int amount)  balanceAdded,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  started,required TResult Function( int amount)  depositChanged,required TResult Function( String itemName,  int price)  itemPurchased,required TResult Function( int amount)  balanceAdded,required TResult Function( int cash)  cashUpdated,required TResult Function( List<Stock> stocks)  stocksUpdated,}) {final _that = this;
 switch (_that) {
-case _DepositChanged():
+case _Started():
+return started();case _DepositChanged():
 return depositChanged(_that.amount);case _ItemPurchased():
 return itemPurchased(_that.itemName,_that.price);case _BalanceAdded():
-return balanceAdded(_that.amount);}
+return balanceAdded(_that.amount);case _CashUpdated():
+return cashUpdated(_that.cash);case _StocksUpdated():
+return stocksUpdated(_that.stocks);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -164,18 +179,53 @@ return balanceAdded(_that.amount);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int amount)?  depositChanged,TResult? Function( String itemName,  int price)?  itemPurchased,TResult? Function( int amount)?  balanceAdded,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  started,TResult? Function( int amount)?  depositChanged,TResult? Function( String itemName,  int price)?  itemPurchased,TResult? Function( int amount)?  balanceAdded,TResult? Function( int cash)?  cashUpdated,TResult? Function( List<Stock> stocks)?  stocksUpdated,}) {final _that = this;
 switch (_that) {
-case _DepositChanged() when depositChanged != null:
+case _Started() when started != null:
+return started();case _DepositChanged() when depositChanged != null:
 return depositChanged(_that.amount);case _ItemPurchased() when itemPurchased != null:
 return itemPurchased(_that.itemName,_that.price);case _BalanceAdded() when balanceAdded != null:
-return balanceAdded(_that.amount);case _:
+return balanceAdded(_that.amount);case _CashUpdated() when cashUpdated != null:
+return cashUpdated(_that.cash);case _StocksUpdated() when stocksUpdated != null:
+return stocksUpdated(_that.stocks);case _:
   return null;
 
 }
 }
 
 }
+
+/// @nodoc
+
+
+class _Started implements AssetEvent {
+  const _Started();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Started);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'AssetEvent.started()';
+}
+
+
+}
+
+
+
 
 /// @nodoc
 
@@ -371,6 +421,144 @@ class __$BalanceAddedCopyWithImpl<$Res>
   return _then(_BalanceAdded(
 null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
 as int,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _CashUpdated implements AssetEvent {
+  const _CashUpdated(this.cash);
+  
+
+ final  int cash;
+
+/// Create a copy of AssetEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$CashUpdatedCopyWith<_CashUpdated> get copyWith => __$CashUpdatedCopyWithImpl<_CashUpdated>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CashUpdated&&(identical(other.cash, cash) || other.cash == cash));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,cash);
+
+@override
+String toString() {
+  return 'AssetEvent.cashUpdated(cash: $cash)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$CashUpdatedCopyWith<$Res> implements $AssetEventCopyWith<$Res> {
+  factory _$CashUpdatedCopyWith(_CashUpdated value, $Res Function(_CashUpdated) _then) = __$CashUpdatedCopyWithImpl;
+@useResult
+$Res call({
+ int cash
+});
+
+
+
+
+}
+/// @nodoc
+class __$CashUpdatedCopyWithImpl<$Res>
+    implements _$CashUpdatedCopyWith<$Res> {
+  __$CashUpdatedCopyWithImpl(this._self, this._then);
+
+  final _CashUpdated _self;
+  final $Res Function(_CashUpdated) _then;
+
+/// Create a copy of AssetEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? cash = null,}) {
+  return _then(_CashUpdated(
+null == cash ? _self.cash : cash // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _StocksUpdated implements AssetEvent {
+  const _StocksUpdated(final  List<Stock> stocks): _stocks = stocks;
+  
+
+ final  List<Stock> _stocks;
+ List<Stock> get stocks {
+  if (_stocks is EqualUnmodifiableListView) return _stocks;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_stocks);
+}
+
+
+/// Create a copy of AssetEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$StocksUpdatedCopyWith<_StocksUpdated> get copyWith => __$StocksUpdatedCopyWithImpl<_StocksUpdated>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StocksUpdated&&const DeepCollectionEquality().equals(other._stocks, _stocks));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_stocks));
+
+@override
+String toString() {
+  return 'AssetEvent.stocksUpdated(stocks: $stocks)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$StocksUpdatedCopyWith<$Res> implements $AssetEventCopyWith<$Res> {
+  factory _$StocksUpdatedCopyWith(_StocksUpdated value, $Res Function(_StocksUpdated) _then) = __$StocksUpdatedCopyWithImpl;
+@useResult
+$Res call({
+ List<Stock> stocks
+});
+
+
+
+
+}
+/// @nodoc
+class __$StocksUpdatedCopyWithImpl<$Res>
+    implements _$StocksUpdatedCopyWith<$Res> {
+  __$StocksUpdatedCopyWithImpl(this._self, this._then);
+
+  final _StocksUpdated _self;
+  final $Res Function(_StocksUpdated) _then;
+
+/// Create a copy of AssetEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? stocks = null,}) {
+  return _then(_StocksUpdated(
+null == stocks ? _self._stocks : stocks // ignore: cast_nullable_to_non_nullable
+as List<Stock>,
   ));
 }
 
@@ -937,7 +1125,8 @@ mixin _$Stock {
 
  String get name;// 주식 이름
  String get ticker;// 주식 티커
- int get quantity;
+ int get quantity;// 보유 수량 (주)
+ int get avgPrice;
 /// Create a copy of Stock
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -948,16 +1137,16 @@ $StockCopyWith<Stock> get copyWith => _$StockCopyWithImpl<Stock>(this as Stock, 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Stock&&(identical(other.name, name) || other.name == name)&&(identical(other.ticker, ticker) || other.ticker == ticker)&&(identical(other.quantity, quantity) || other.quantity == quantity));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Stock&&(identical(other.name, name) || other.name == name)&&(identical(other.ticker, ticker) || other.ticker == ticker)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.avgPrice, avgPrice) || other.avgPrice == avgPrice));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,name,ticker,quantity);
+int get hashCode => Object.hash(runtimeType,name,ticker,quantity,avgPrice);
 
 @override
 String toString() {
-  return 'Stock(name: $name, ticker: $ticker, quantity: $quantity)';
+  return 'Stock(name: $name, ticker: $ticker, quantity: $quantity, avgPrice: $avgPrice)';
 }
 
 
@@ -968,7 +1157,7 @@ abstract mixin class $StockCopyWith<$Res>  {
   factory $StockCopyWith(Stock value, $Res Function(Stock) _then) = _$StockCopyWithImpl;
 @useResult
 $Res call({
- String name, String ticker, int quantity
+ String name, String ticker, int quantity, int avgPrice
 });
 
 
@@ -985,11 +1174,12 @@ class _$StockCopyWithImpl<$Res>
 
 /// Create a copy of Stock
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? ticker = null,Object? quantity = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? ticker = null,Object? quantity = null,Object? avgPrice = null,}) {
   return _then(_self.copyWith(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,ticker: null == ticker ? _self.ticker : ticker // ignore: cast_nullable_to_non_nullable
 as String,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
+as int,avgPrice: null == avgPrice ? _self.avgPrice : avgPrice // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -1075,10 +1265,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  String ticker,  int quantity)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  String ticker,  int quantity,  int avgPrice)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Stock() when $default != null:
-return $default(_that.name,_that.ticker,_that.quantity);case _:
+return $default(_that.name,_that.ticker,_that.quantity,_that.avgPrice);case _:
   return orElse();
 
 }
@@ -1096,10 +1286,10 @@ return $default(_that.name,_that.ticker,_that.quantity);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  String ticker,  int quantity)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  String ticker,  int quantity,  int avgPrice)  $default,) {final _that = this;
 switch (_that) {
 case _Stock():
-return $default(_that.name,_that.ticker,_that.quantity);case _:
+return $default(_that.name,_that.ticker,_that.quantity,_that.avgPrice);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1116,10 +1306,10 @@ return $default(_that.name,_that.ticker,_that.quantity);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  String ticker,  int quantity)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  String ticker,  int quantity,  int avgPrice)?  $default,) {final _that = this;
 switch (_that) {
 case _Stock() when $default != null:
-return $default(_that.name,_that.ticker,_that.quantity);case _:
+return $default(_that.name,_that.ticker,_that.quantity,_that.avgPrice);case _:
   return null;
 
 }
@@ -1131,7 +1321,7 @@ return $default(_that.name,_that.ticker,_that.quantity);case _:
 
 
 class _Stock implements Stock {
-  const _Stock({required this.name, required this.ticker, required this.quantity});
+  const _Stock({required this.name, required this.ticker, required this.quantity, this.avgPrice = 0});
   
 
 @override final  String name;
@@ -1139,6 +1329,8 @@ class _Stock implements Stock {
 @override final  String ticker;
 // 주식 티커
 @override final  int quantity;
+// 보유 수량 (주)
+@override@JsonKey() final  int avgPrice;
 
 /// Create a copy of Stock
 /// with the given fields replaced by the non-null parameter values.
@@ -1150,16 +1342,16 @@ _$StockCopyWith<_Stock> get copyWith => __$StockCopyWithImpl<_Stock>(this, _$ide
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Stock&&(identical(other.name, name) || other.name == name)&&(identical(other.ticker, ticker) || other.ticker == ticker)&&(identical(other.quantity, quantity) || other.quantity == quantity));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Stock&&(identical(other.name, name) || other.name == name)&&(identical(other.ticker, ticker) || other.ticker == ticker)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.avgPrice, avgPrice) || other.avgPrice == avgPrice));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,name,ticker,quantity);
+int get hashCode => Object.hash(runtimeType,name,ticker,quantity,avgPrice);
 
 @override
 String toString() {
-  return 'Stock(name: $name, ticker: $ticker, quantity: $quantity)';
+  return 'Stock(name: $name, ticker: $ticker, quantity: $quantity, avgPrice: $avgPrice)';
 }
 
 
@@ -1170,7 +1362,7 @@ abstract mixin class _$StockCopyWith<$Res> implements $StockCopyWith<$Res> {
   factory _$StockCopyWith(_Stock value, $Res Function(_Stock) _then) = __$StockCopyWithImpl;
 @override @useResult
 $Res call({
- String name, String ticker, int quantity
+ String name, String ticker, int quantity, int avgPrice
 });
 
 
@@ -1187,11 +1379,12 @@ class __$StockCopyWithImpl<$Res>
 
 /// Create a copy of Stock
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? ticker = null,Object? quantity = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? ticker = null,Object? quantity = null,Object? avgPrice = null,}) {
   return _then(_Stock(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,ticker: null == ticker ? _self.ticker : ticker // ignore: cast_nullable_to_non_nullable
 as String,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
+as int,avgPrice: null == avgPrice ? _self.avgPrice : avgPrice // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }

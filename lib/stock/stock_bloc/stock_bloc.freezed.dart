@@ -55,7 +55,7 @@ extension StockEventPatterns on StockEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Started value)?  started,TResult Function( _BuyStock value)?  buyStock,TResult Function( _SellStock value)?  sellStock,TResult Function( _UpdatePrices value)?  updatePrices,TResult Function( _TriggerEvent value)?  triggerEvent,TResult Function( _ClearEvent value)?  clearEvent,TResult Function( _SelectStock value)?  selectStock,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Started value)?  started,TResult Function( _BuyStock value)?  buyStock,TResult Function( _SellStock value)?  sellStock,TResult Function( _UpdatePrices value)?  updatePrices,TResult Function( _TriggerEvent value)?  triggerEvent,TResult Function( _ClearEvent value)?  clearEvent,TResult Function( _SelectStock value)?  selectStock,TResult Function( _StocksUpdated value)?  stocksUpdated,TResult Function( _CashUpdated value)?  cashUpdated,TResult Function( _PortfolioUpdated value)?  portfolioUpdated,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Started() when started != null:
@@ -65,7 +65,10 @@ return sellStock(_that);case _UpdatePrices() when updatePrices != null:
 return updatePrices(_that);case _TriggerEvent() when triggerEvent != null:
 return triggerEvent(_that);case _ClearEvent() when clearEvent != null:
 return clearEvent(_that);case _SelectStock() when selectStock != null:
-return selectStock(_that);case _:
+return selectStock(_that);case _StocksUpdated() when stocksUpdated != null:
+return stocksUpdated(_that);case _CashUpdated() when cashUpdated != null:
+return cashUpdated(_that);case _PortfolioUpdated() when portfolioUpdated != null:
+return portfolioUpdated(_that);case _:
   return orElse();
 
 }
@@ -83,7 +86,7 @@ return selectStock(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Started value)  started,required TResult Function( _BuyStock value)  buyStock,required TResult Function( _SellStock value)  sellStock,required TResult Function( _UpdatePrices value)  updatePrices,required TResult Function( _TriggerEvent value)  triggerEvent,required TResult Function( _ClearEvent value)  clearEvent,required TResult Function( _SelectStock value)  selectStock,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Started value)  started,required TResult Function( _BuyStock value)  buyStock,required TResult Function( _SellStock value)  sellStock,required TResult Function( _UpdatePrices value)  updatePrices,required TResult Function( _TriggerEvent value)  triggerEvent,required TResult Function( _ClearEvent value)  clearEvent,required TResult Function( _SelectStock value)  selectStock,required TResult Function( _StocksUpdated value)  stocksUpdated,required TResult Function( _CashUpdated value)  cashUpdated,required TResult Function( _PortfolioUpdated value)  portfolioUpdated,}){
 final _that = this;
 switch (_that) {
 case _Started():
@@ -93,7 +96,10 @@ return sellStock(_that);case _UpdatePrices():
 return updatePrices(_that);case _TriggerEvent():
 return triggerEvent(_that);case _ClearEvent():
 return clearEvent(_that);case _SelectStock():
-return selectStock(_that);}
+return selectStock(_that);case _StocksUpdated():
+return stocksUpdated(_that);case _CashUpdated():
+return cashUpdated(_that);case _PortfolioUpdated():
+return portfolioUpdated(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -107,7 +113,7 @@ return selectStock(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Started value)?  started,TResult? Function( _BuyStock value)?  buyStock,TResult? Function( _SellStock value)?  sellStock,TResult? Function( _UpdatePrices value)?  updatePrices,TResult? Function( _TriggerEvent value)?  triggerEvent,TResult? Function( _ClearEvent value)?  clearEvent,TResult? Function( _SelectStock value)?  selectStock,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Started value)?  started,TResult? Function( _BuyStock value)?  buyStock,TResult? Function( _SellStock value)?  sellStock,TResult? Function( _UpdatePrices value)?  updatePrices,TResult? Function( _TriggerEvent value)?  triggerEvent,TResult? Function( _ClearEvent value)?  clearEvent,TResult? Function( _SelectStock value)?  selectStock,TResult? Function( _StocksUpdated value)?  stocksUpdated,TResult? Function( _CashUpdated value)?  cashUpdated,TResult? Function( _PortfolioUpdated value)?  portfolioUpdated,}){
 final _that = this;
 switch (_that) {
 case _Started() when started != null:
@@ -117,7 +123,10 @@ return sellStock(_that);case _UpdatePrices() when updatePrices != null:
 return updatePrices(_that);case _TriggerEvent() when triggerEvent != null:
 return triggerEvent(_that);case _ClearEvent() when clearEvent != null:
 return clearEvent(_that);case _SelectStock() when selectStock != null:
-return selectStock(_that);case _:
+return selectStock(_that);case _StocksUpdated() when stocksUpdated != null:
+return stocksUpdated(_that);case _CashUpdated() when cashUpdated != null:
+return cashUpdated(_that);case _PortfolioUpdated() when portfolioUpdated != null:
+return portfolioUpdated(_that);case _:
   return null;
 
 }
@@ -134,7 +143,7 @@ return selectStock(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  started,TResult Function( String symbol,  int quantity)?  buyStock,TResult Function( String symbol,  int quantity)?  sellStock,TResult Function()?  updatePrices,TResult Function( models.StockEventModel event)?  triggerEvent,TResult Function()?  clearEvent,TResult Function( String symbol)?  selectStock,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  started,TResult Function( String symbol,  int quantity)?  buyStock,TResult Function( String symbol,  int quantity)?  sellStock,TResult Function()?  updatePrices,TResult Function( models.StockEventModel event)?  triggerEvent,TResult Function()?  clearEvent,TResult Function( String symbol)?  selectStock,TResult Function( List<Stock> stocks)?  stocksUpdated,TResult Function( int cash)?  cashUpdated,TResult Function( List<asset.Stock> assetStocks)?  portfolioUpdated,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Started() when started != null:
 return started();case _BuyStock() when buyStock != null:
@@ -143,7 +152,10 @@ return sellStock(_that.symbol,_that.quantity);case _UpdatePrices() when updatePr
 return updatePrices();case _TriggerEvent() when triggerEvent != null:
 return triggerEvent(_that.event);case _ClearEvent() when clearEvent != null:
 return clearEvent();case _SelectStock() when selectStock != null:
-return selectStock(_that.symbol);case _:
+return selectStock(_that.symbol);case _StocksUpdated() when stocksUpdated != null:
+return stocksUpdated(_that.stocks);case _CashUpdated() when cashUpdated != null:
+return cashUpdated(_that.cash);case _PortfolioUpdated() when portfolioUpdated != null:
+return portfolioUpdated(_that.assetStocks);case _:
   return orElse();
 
 }
@@ -161,7 +173,7 @@ return selectStock(_that.symbol);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  started,required TResult Function( String symbol,  int quantity)  buyStock,required TResult Function( String symbol,  int quantity)  sellStock,required TResult Function()  updatePrices,required TResult Function( models.StockEventModel event)  triggerEvent,required TResult Function()  clearEvent,required TResult Function( String symbol)  selectStock,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  started,required TResult Function( String symbol,  int quantity)  buyStock,required TResult Function( String symbol,  int quantity)  sellStock,required TResult Function()  updatePrices,required TResult Function( models.StockEventModel event)  triggerEvent,required TResult Function()  clearEvent,required TResult Function( String symbol)  selectStock,required TResult Function( List<Stock> stocks)  stocksUpdated,required TResult Function( int cash)  cashUpdated,required TResult Function( List<asset.Stock> assetStocks)  portfolioUpdated,}) {final _that = this;
 switch (_that) {
 case _Started():
 return started();case _BuyStock():
@@ -170,7 +182,10 @@ return sellStock(_that.symbol,_that.quantity);case _UpdatePrices():
 return updatePrices();case _TriggerEvent():
 return triggerEvent(_that.event);case _ClearEvent():
 return clearEvent();case _SelectStock():
-return selectStock(_that.symbol);}
+return selectStock(_that.symbol);case _StocksUpdated():
+return stocksUpdated(_that.stocks);case _CashUpdated():
+return cashUpdated(_that.cash);case _PortfolioUpdated():
+return portfolioUpdated(_that.assetStocks);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -184,7 +199,7 @@ return selectStock(_that.symbol);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  started,TResult? Function( String symbol,  int quantity)?  buyStock,TResult? Function( String symbol,  int quantity)?  sellStock,TResult? Function()?  updatePrices,TResult? Function( models.StockEventModel event)?  triggerEvent,TResult? Function()?  clearEvent,TResult? Function( String symbol)?  selectStock,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  started,TResult? Function( String symbol,  int quantity)?  buyStock,TResult? Function( String symbol,  int quantity)?  sellStock,TResult? Function()?  updatePrices,TResult? Function( models.StockEventModel event)?  triggerEvent,TResult? Function()?  clearEvent,TResult? Function( String symbol)?  selectStock,TResult? Function( List<Stock> stocks)?  stocksUpdated,TResult? Function( int cash)?  cashUpdated,TResult? Function( List<asset.Stock> assetStocks)?  portfolioUpdated,}) {final _that = this;
 switch (_that) {
 case _Started() when started != null:
 return started();case _BuyStock() when buyStock != null:
@@ -193,7 +208,10 @@ return sellStock(_that.symbol,_that.quantity);case _UpdatePrices() when updatePr
 return updatePrices();case _TriggerEvent() when triggerEvent != null:
 return triggerEvent(_that.event);case _ClearEvent() when clearEvent != null:
 return clearEvent();case _SelectStock() when selectStock != null:
-return selectStock(_that.symbol);case _:
+return selectStock(_that.symbol);case _StocksUpdated() when stocksUpdated != null:
+return stocksUpdated(_that.stocks);case _CashUpdated() when cashUpdated != null:
+return cashUpdated(_that.cash);case _PortfolioUpdated() when portfolioUpdated != null:
+return portfolioUpdated(_that.assetStocks);case _:
   return null;
 
 }
@@ -568,6 +586,216 @@ class __$SelectStockCopyWithImpl<$Res>
   return _then(_SelectStock(
 null == symbol ? _self.symbol : symbol // ignore: cast_nullable_to_non_nullable
 as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _StocksUpdated implements StockEvent {
+  const _StocksUpdated(final  List<Stock> stocks): _stocks = stocks;
+  
+
+ final  List<Stock> _stocks;
+ List<Stock> get stocks {
+  if (_stocks is EqualUnmodifiableListView) return _stocks;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_stocks);
+}
+
+
+/// Create a copy of StockEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$StocksUpdatedCopyWith<_StocksUpdated> get copyWith => __$StocksUpdatedCopyWithImpl<_StocksUpdated>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StocksUpdated&&const DeepCollectionEquality().equals(other._stocks, _stocks));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_stocks));
+
+@override
+String toString() {
+  return 'StockEvent.stocksUpdated(stocks: $stocks)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$StocksUpdatedCopyWith<$Res> implements $StockEventCopyWith<$Res> {
+  factory _$StocksUpdatedCopyWith(_StocksUpdated value, $Res Function(_StocksUpdated) _then) = __$StocksUpdatedCopyWithImpl;
+@useResult
+$Res call({
+ List<Stock> stocks
+});
+
+
+
+
+}
+/// @nodoc
+class __$StocksUpdatedCopyWithImpl<$Res>
+    implements _$StocksUpdatedCopyWith<$Res> {
+  __$StocksUpdatedCopyWithImpl(this._self, this._then);
+
+  final _StocksUpdated _self;
+  final $Res Function(_StocksUpdated) _then;
+
+/// Create a copy of StockEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? stocks = null,}) {
+  return _then(_StocksUpdated(
+null == stocks ? _self._stocks : stocks // ignore: cast_nullable_to_non_nullable
+as List<Stock>,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _CashUpdated implements StockEvent {
+  const _CashUpdated(this.cash);
+  
+
+ final  int cash;
+
+/// Create a copy of StockEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$CashUpdatedCopyWith<_CashUpdated> get copyWith => __$CashUpdatedCopyWithImpl<_CashUpdated>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CashUpdated&&(identical(other.cash, cash) || other.cash == cash));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,cash);
+
+@override
+String toString() {
+  return 'StockEvent.cashUpdated(cash: $cash)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$CashUpdatedCopyWith<$Res> implements $StockEventCopyWith<$Res> {
+  factory _$CashUpdatedCopyWith(_CashUpdated value, $Res Function(_CashUpdated) _then) = __$CashUpdatedCopyWithImpl;
+@useResult
+$Res call({
+ int cash
+});
+
+
+
+
+}
+/// @nodoc
+class __$CashUpdatedCopyWithImpl<$Res>
+    implements _$CashUpdatedCopyWith<$Res> {
+  __$CashUpdatedCopyWithImpl(this._self, this._then);
+
+  final _CashUpdated _self;
+  final $Res Function(_CashUpdated) _then;
+
+/// Create a copy of StockEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? cash = null,}) {
+  return _then(_CashUpdated(
+null == cash ? _self.cash : cash // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _PortfolioUpdated implements StockEvent {
+  const _PortfolioUpdated(final  List<asset.Stock> assetStocks): _assetStocks = assetStocks;
+  
+
+ final  List<asset.Stock> _assetStocks;
+ List<asset.Stock> get assetStocks {
+  if (_assetStocks is EqualUnmodifiableListView) return _assetStocks;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_assetStocks);
+}
+
+
+/// Create a copy of StockEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$PortfolioUpdatedCopyWith<_PortfolioUpdated> get copyWith => __$PortfolioUpdatedCopyWithImpl<_PortfolioUpdated>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PortfolioUpdated&&const DeepCollectionEquality().equals(other._assetStocks, _assetStocks));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_assetStocks));
+
+@override
+String toString() {
+  return 'StockEvent.portfolioUpdated(assetStocks: $assetStocks)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$PortfolioUpdatedCopyWith<$Res> implements $StockEventCopyWith<$Res> {
+  factory _$PortfolioUpdatedCopyWith(_PortfolioUpdated value, $Res Function(_PortfolioUpdated) _then) = __$PortfolioUpdatedCopyWithImpl;
+@useResult
+$Res call({
+ List<asset.Stock> assetStocks
+});
+
+
+
+
+}
+/// @nodoc
+class __$PortfolioUpdatedCopyWithImpl<$Res>
+    implements _$PortfolioUpdatedCopyWith<$Res> {
+  __$PortfolioUpdatedCopyWithImpl(this._self, this._then);
+
+  final _PortfolioUpdated _self;
+  final $Res Function(_PortfolioUpdated) _then;
+
+/// Create a copy of StockEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? assetStocks = null,}) {
+  return _then(_PortfolioUpdated(
+null == assetStocks ? _self._assetStocks : assetStocks // ignore: cast_nullable_to_non_nullable
+as List<asset.Stock>,
   ));
 }
 

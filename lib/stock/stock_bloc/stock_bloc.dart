@@ -8,6 +8,9 @@ import '../models/stock_event_model.dart' as models;
 import '../models/stock_event_model.dart';
 import '../data/initial_stocks.dart';
 import '../data/stock_events.dart';
+import '../../data/repositories/asset_repository.dart';
+import '../../data/repositories/stock_repository.dart' as repo;
+import '../../asset/asset_bloc/asset_bloc.dart' as asset;
 
 part 'stock_event.dart';
 part 'stock_state.dart';
@@ -16,8 +19,13 @@ part 'stock_bloc.freezed.dart';
 class StockBloc extends Bloc<StockEvent, StockState> {
   Timer? _priceUpdateTimer;
   final Random _random = Random();
+  final AssetRepository? assetRepository;
+  final repo.StockRepository? stockRepository;
+  StreamSubscription? _cashSubscription;
+  StreamSubscription? _stocksSubscription;
+  StreamSubscription? _portfolioSubscription;
 
-  StockBloc() : super(_initState) {
+  StockBloc({this.assetRepository, this.stockRepository}) : super(_initState) {
     on<_Started>(_onStarted);
     on<_BuyStock>(_onBuyStock);
     on<_SellStock>(_onSellStock);
@@ -25,6 +33,38 @@ class StockBloc extends Bloc<StockEvent, StockState> {
     on<_TriggerEvent>(_onTriggerEvent);
     on<_ClearEvent>(_onClearEvent);
     on<_SelectStock>(_onSelectStock);
+    on<_StocksUpdated>(_onStocksUpdated);
+    on<_CashUpdated>(_onCashUpdated);
+    on<_PortfolioUpdated>(_onPortfolioUpdated);
+
+    // AssetRepository의 cashStream 구독
+    if (assetRepository != null) {
+      _cashSubscription = assetRepository!.cashStream.listen((cash) {
+        add(StockEvent.cashUpdated(cash));
+      });
+
+      // AssetRepository의 stocksStream 구독 (포트폴리오 동기화)
+      _portfolioSubscription = assetRepository!.stocksStream.listen((assetStocks) {
+        add(StockEvent.portfolioUpdated(assetStocks));
+      });
+    }
+
+    // StockRepository의 tradableStocksStream 구독
+    if (stockRepository != null) {
+      _stocksSubscription = stockRepository!.tradableStocksStream.listen((tradableStocks) {
+        // TradableStock을 Stock 모델로 변환 (간단하게)
+        final updatedStocks = tradableStocks.map((ts) => Stock(
+          symbol: ts.ticker,
+          name: ts.name,
+          price: ts.currentPrice.toDouble(),
+          change: 0.0,
+          volume: 1000000,
+        )).toList();
+
+        // Event로 전달
+        add(StockEvent.stocksUpdated(updatedStocks));
+      });
+    }
 
     // 3초마다 주가 업데이트
     _priceUpdateTimer = Timer.periodic(
@@ -44,11 +84,38 @@ class StockBloc extends Bloc<StockEvent, StockState> {
     _Started event,
     Emitter<StockState> emit,
   ) async {
+    // StockRepository에서 초기 주식 데이터 가져오기
+    List<Stock> initialStockList = initialStocks;
+    if (stockRepository != null) {
+      final tradableStocks = stockRepository!.tradableStocks;
+      if (tradableStocks.isNotEmpty) {
+        initialStockList = tradableStocks.map((ts) => Stock(
+          symbol: ts.ticker,
+          name: ts.name,
+          price: ts.currentPrice.toDouble(),
+          change: 0.0,
+          volume: 1000000,
+        )).toList();
+      }
+    }
+
+    // AssetRepository에서 초기 포트폴리오 가져오기
+    List<PortfolioItem> initialPortfolio = [];
+    if (assetRepository != null) {
+      initialPortfolio = assetRepository!.myStocks.map((assetStock) => PortfolioItem(
+        symbol: assetStock.ticker,
+        quantity: assetStock.quantity,
+        avgPrice: assetStock.avgPrice.toDouble(),
+      )).toList();
+    }
+
     emit(state.maybeWhen(
       data: (data) => StockState.data(data.copyWith(
         status: StockStatus.success,
-        stocks: initialStocks,
-        selectedStock: initialStocks.first.symbol,
+        stocks: initialStockList,
+        selectedStock: initialStockList.isNotEmpty ? initialStockList.first.symbol : null,
+        currentBalance: assetRepository?.currentCash.toDouble() ?? data.currentBalance,
+        portfolio: initialPortfolio,
       )),
       orElse: () => state,
     ));
@@ -73,49 +140,28 @@ class StockBloc extends Bloc<StockEvent, StockState> {
     await state.maybeWhen(
       data: (data) async {
         final stock = data.stocks.firstWhere((s) => s.symbol == event.symbol);
-        final totalCost = stock.price * event.quantity;
 
-        if (totalCost > data.currentBalance) {
-          emit(StockState.data(data.copyWith(
-            errorMessage: '잔고가 부족합니다!',
-          )));
-          return;
-        }
-
-        final newBalance = data.currentBalance - totalCost;
-        final existingIndex =
-            data.portfolio.indexWhere((p) => p.symbol == event.symbol);
-
-        List<PortfolioItem> newPortfolio;
-        if (existingIndex != -1) {
-          final existing = data.portfolio[existingIndex];
-          final newQuantity = existing.quantity + event.quantity;
-          final newAvgPrice = ((existing.avgPrice * existing.quantity) +
-                  (stock.price * event.quantity)) /
-              newQuantity;
-
-          newPortfolio = List.from(data.portfolio);
-          newPortfolio[existingIndex] = PortfolioItem(
-            symbol: event.symbol,
-            quantity: newQuantity,
-            avgPrice: newAvgPrice,
+        // AssetRepository를 통해 매수 (잔고 확인 및 차감 포함)
+        if (assetRepository != null) {
+          final success = await assetRepository!.buyStock(
+            ticker: event.symbol,
+            quantity: event.quantity,
+            price: stock.price.toInt(),
           );
-        } else {
-          newPortfolio = [
-            ...data.portfolio,
-            PortfolioItem(
-              symbol: event.symbol,
-              quantity: event.quantity,
-              avgPrice: stock.price,
-            ),
-          ];
-        }
 
-        emit(StockState.data(data.copyWith(
-          currentBalance: newBalance,
-          portfolio: newPortfolio,
-          errorMessage: null,
-        )));
+          if (!success) {
+            emit(StockState.data(data.copyWith(
+              errorMessage: '잔고가 부족합니다!',
+            )));
+            return;
+          }
+          // stocksStream이 portfolio를 자동 업데이트
+        } else {
+          // AssetRepository가 없는 경우 에러 메시지
+          emit(StockState.data(data.copyWith(
+            errorMessage: 'Repository가 설정되지 않았습니다!',
+          )));
+        }
       },
       orElse: () {},
     );
@@ -127,44 +173,29 @@ class StockBloc extends Bloc<StockEvent, StockState> {
   ) async {
     await state.maybeWhen(
       data: (data) async {
-        final holding =
-            data.portfolio.firstWhere((p) => p.symbol == event.symbol,
-                orElse: () => const PortfolioItem(
-                      symbol: '',
-                      quantity: 0,
-                      avgPrice: 0,
-                    ));
-
-        if (holding.symbol.isEmpty || holding.quantity < event.quantity) {
-          emit(StockState.data(data.copyWith(
-            errorMessage: '보유 수량이 부족합니다!',
-          )));
-          return;
-        }
-
         final stock = data.stocks.firstWhere((s) => s.symbol == event.symbol);
-        final totalRevenue = stock.price * event.quantity;
-        final newBalance = data.currentBalance + totalRevenue;
 
-        final newPortfolio = data.portfolio
-            .map((p) {
-              if (p.symbol == event.symbol) {
-                return PortfolioItem(
-                  symbol: p.symbol,
-                  quantity: p.quantity - event.quantity,
-                  avgPrice: p.avgPrice,
-                );
-              }
-              return p;
-            })
-            .where((p) => p.quantity > 0)
-            .toList();
+        // AssetRepository를 통해 매도 (보유 수량 확인 및 현금 증가 포함)
+        if (assetRepository != null) {
+          final success = await assetRepository!.sellStock(
+            ticker: event.symbol,
+            quantity: event.quantity,
+            price: stock.price.toInt(),
+          );
 
-        emit(StockState.data(data.copyWith(
-          currentBalance: newBalance,
-          portfolio: newPortfolio,
-          errorMessage: null,
-        )));
+          if (!success) {
+            emit(StockState.data(data.copyWith(
+              errorMessage: '보유 수량이 부족합니다!',
+            )));
+            return;
+          }
+          // stocksStream이 portfolio를 자동 업데이트
+        } else {
+          // AssetRepository가 없는 경우 에러 메시지
+          emit(StockState.data(data.copyWith(
+            errorMessage: 'Repository가 설정되지 않았습니다!',
+          )));
+        }
       },
       orElse: () {},
     );
@@ -361,9 +392,13 @@ class StockBloc extends Bloc<StockEvent, StockState> {
             dividendAmount += stock.price * item.quantity * event.event.effect.value;
           }
 
+          // AssetRepository를 통해 배당금 추가 (모든 화면에서 동기화)
+          if (assetRepository != null) {
+            await assetRepository!.addCash(dividendAmount.toInt());
+          }
+
           emit(StockState.data(data.copyWith(
             activeEvent: event.event,
-            currentBalance: data.currentBalance + dividendAmount,
           )));
 
           // 3초 후 이벤트 자동 종료
@@ -391,9 +426,55 @@ class StockBloc extends Bloc<StockEvent, StockState> {
     ));
   }
 
+  Future<void> _onStocksUpdated(
+    _StocksUpdated event,
+    Emitter<StockState> emit,
+  ) async {
+    emit(state.maybeWhen(
+      data: (data) => StockState.data(data.copyWith(
+        stocks: event.stocks,
+      )),
+      orElse: () => state,
+    ));
+  }
+
+  Future<void> _onCashUpdated(
+    _CashUpdated event,
+    Emitter<StockState> emit,
+  ) async {
+    emit(state.maybeWhen(
+      data: (data) => StockState.data(data.copyWith(
+        currentBalance: event.cash.toDouble(),
+      )),
+      orElse: () => state,
+    ));
+  }
+
+  Future<void> _onPortfolioUpdated(
+    _PortfolioUpdated event,
+    Emitter<StockState> emit,
+  ) async {
+    // AssetRepository의 Stock을 StockBloc의 PortfolioItem으로 변환
+    final portfolio = event.assetStocks.map((assetStock) => PortfolioItem(
+      symbol: assetStock.ticker,
+      quantity: assetStock.quantity,
+      avgPrice: assetStock.avgPrice.toDouble(),
+    )).toList();
+
+    emit(state.maybeWhen(
+      data: (data) => StockState.data(data.copyWith(
+        portfolio: portfolio,
+      )),
+      orElse: () => state,
+    ));
+  }
+
   @override
   Future<void> close() {
     _priceUpdateTimer?.cancel();
+    _cashSubscription?.cancel();
+    _stocksSubscription?.cancel();
+    _portfolioSubscription?.cancel();
     return super.close();
   }
 }
