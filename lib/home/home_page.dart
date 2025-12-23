@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../game/coco_game.dart';
 import '../game/player_bloc/player_bloc.dart';
+import '../data/repositories/auth_repository.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -78,6 +79,17 @@ class _HomePageState extends State<HomePage> {
               onPressed: () => context.push('/asset'),
               backgroundColor: const Color(0xFFE67E22),
               child: const Icon(Icons.account_balance_wallet),
+            ),
+          ),
+          // 로그아웃 버튼
+          Positioned(
+            top: 230,
+            left: 20,
+            child: FloatingActionButton(
+              heroTag: 'logout_button',
+              onPressed: () => _showLogoutDialog(context),
+              backgroundColor: const Color(0xFFE74C3C),
+              child: const Icon(Icons.logout),
             ),
           ),
           // 주식창 버튼
@@ -155,6 +167,118 @@ class _HomePageState extends State<HomePage> {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon, size: 30),
+      ),
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFF5F5DC), // 베이지 배경
+            border: Border.all(color: Colors.black, width: 3),
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 제목
+              const Text(
+                '로그아웃',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 16),
+              // 메시지
+              const Text(
+                '로그아웃 하시겠습니까?',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              // 버튼들
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // 취소 버튼
+                  Expanded(
+                    child: Container(
+                      height: 45,
+                      decoration: BoxDecoration(
+                        color: Colors.grey,
+                        border: Border.all(color: Colors.black, width: 2),
+                      ),
+                      child: TextButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(),
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero,
+                          ),
+                        ),
+                        child: const Text(
+                          '취소',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // 확인 버튼
+                  Expanded(
+                    child: Container(
+                      height: 45,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE74C3C),
+                        border: Border.all(color: Colors.black, width: 2),
+                      ),
+                      child: TextButton(
+                        onPressed: () {
+                          // 로그아웃 처리
+                          final authRepository = context.read<AuthRepository>();
+                          authRepository.logout();
+
+                          // 다이얼로그 닫기
+                          Navigator.of(dialogContext).pop();
+
+                          // 회원가입 화면으로 이동 (스택 초기화)
+                          context.go('/signup');
+                        },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero,
+                          ),
+                        ),
+                        child: const Text(
+                          '확인',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
