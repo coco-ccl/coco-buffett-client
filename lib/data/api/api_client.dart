@@ -151,7 +151,7 @@ class ApiClient {
   /// GET /cocobuffet/v1/items/owned/me
   Future<ApiResponse<List<ItemResponse>>> getOwnedItems() async {
     try {
-      final response = await _dio.get('/cocobuffet/v1/items/owned/me');
+      final response = await _dio.get('/cocobuffett/v1/items/owned/me');
 
       return ApiResponse.fromJson(
         response.data,
@@ -205,7 +205,7 @@ class ApiClient {
   Future<ApiResponse<dynamic>> signup(SignupRequest request) async {
     try {
       final response = await _dio.post(
-        '/cocobuffet/v1/members/signup',
+        '/cocobuffett/v1/members/signup',
         data: request.toJson(),
       );
 
