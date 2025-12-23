@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,6 +10,7 @@ import '../game/sprites/face.dart';
 import '../game/sprites/hair.dart';
 import '../game/sprites/shoes.dart';
 import '../game/sprites/top.dart';
+import '../data/repositories/item_repository.dart';
 
 class InventoryPage extends StatefulWidget {
   const InventoryPage({super.key});
@@ -19,6 +21,9 @@ class InventoryPage extends StatefulWidget {
 
 class _InventoryPageState extends State<InventoryPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late ItemRepository _itemRepository;
+  StreamSubscription? _ownedItemsSubscription;
+  List<GameItem> _ownedItems = [];
 
   final Map<String, List<InventoryItem>> _inventoryItems = {
     '얼굴': [
@@ -65,8 +70,28 @@ class _InventoryPageState extends State<InventoryPage> with SingleTickerProvider
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // ItemRepository 가져오기
+    _itemRepository = context.read<ItemRepository>();
+
+    // 현재 보유 아이템 가져오기
+    _ownedItems = _itemRepository.ownedItems;
+
+    // ownedItemsStream 구독
+    _ownedItemsSubscription?.cancel();
+    _ownedItemsSubscription = _itemRepository.ownedItemsStream.listen((items) {
+      setState(() {
+        _ownedItems = items;
+      });
+    });
+  }
+
+  @override
   void dispose() {
     _tabController.dispose();
+    _ownedItemsSubscription?.cancel();
     super.dispose();
   }
 

@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../asset/asset_bloc/asset_bloc.dart';
+import '../shop/shop_bloc/shop_bloc.dart';
+import '../data/repositories/asset_repository.dart';
 import '../game/player_bloc/player_bloc.dart';
 import '../game/sprite_layers.dart';
 import '../game/sprites/bottom.dart';
@@ -85,9 +86,13 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
         ),
         actions: [
           // 자산 표시
-          BlocBuilder<AssetBloc, AssetState>(
+          BlocBuilder<ShopBloc, ShopState>(
             builder: (context, state) {
               final numberFormat = NumberFormat('#,###');
+              final cash = state.maybeWhen(
+                loaded: (currentCash, _, __, ___) => currentCash,
+                orElse: () => 0,
+              );
               return Container(
                 margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -101,7 +106,7 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
                     const Icon(Icons.monetization_on, color: Color(0xFFFFD700), size: 20),
                     const SizedBox(width: 6),
                     Text(
-                      '${numberFormat.format(state.data.deposit)} G',
+                      '${numberFormat.format(cash)} G',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -407,11 +412,17 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
     );
   }
 
-  void _handleItemSelect(BuildContext context, ShopItem item, void Function(ShopItem) onSelect) {
-    final assetBloc = context.read<AssetBloc>();
+  void _handleItemSelect(BuildContext context, ShopItem item, void Function(ShopItem) onSelect) async {
+    final shopBloc = context.read<ShopBloc>();
+
+    // ShopBloc 상태에서 현금 확인
+    final currentCash = shopBloc.state.maybeWhen(
+      loaded: (cash, _, __, ___) => cash,
+      orElse: () => 0,
+    );
 
     // 잔액 확인
-    if (item.price > 0 && assetBloc.state.data.deposit < item.price) {
+    if (item.price > 0 && currentCash < item.price) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Row(
@@ -435,12 +446,10 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
     // 아이템 착용/구매
     onSelect(item);
 
-    // 가격이 0이 아닌 경우 자산 차감
+    // 가격이 0이 아닌 경우 자산 차감 (AssetRepository를 통해)
     if (item.price > 0) {
-      assetBloc.add(AssetEvent.itemPurchased(
-        itemName: item.name,
-        price: item.price,
-      ));
+      final assetRepository = context.read<AssetRepository>();
+      await assetRepository.deductCash(item.price);
     }
 
     _showPurchaseSnackBar(item);
