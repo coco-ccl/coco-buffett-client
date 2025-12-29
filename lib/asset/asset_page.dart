@@ -3,9 +3,26 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'asset_bloc/asset_bloc.dart';
+import '../data/repositories/asset_repository.dart';
 
+/// AssetPage Wrapper - BLoC 제공
 class AssetPage extends StatelessWidget {
   const AssetPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => AssetBloc(
+        assetRepository: context.read<AssetRepository>(),
+      )..add(const AssetEvent.started()),
+      child: const _AssetPageContent(),
+    );
+  }
+}
+
+/// AssetPage 실제 내용
+class _AssetPageContent extends StatelessWidget {
+  const _AssetPageContent();
 
   @override
   Widget build(BuildContext context) {

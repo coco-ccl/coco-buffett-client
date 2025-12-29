@@ -66,10 +66,10 @@ class ApiClient {
   }
 
   /// 현재 로그인한 회원 정보 조회
-  /// GET /cocobuffet/v1/members/me
+  /// GET /cocobuffett/v1/members/me
   Future<ApiResponse<MemberInfoResponse>> getMemberInfo() async {
     try {
-      final response = await _dio.get('/cocobuffet/v1/members/me');
+      final response = await _dio.get('/cocobuffett/v1/members/me');
 
       return ApiResponse.fromJson(
         response.data,
@@ -81,10 +81,10 @@ class ApiClient {
   }
 
   /// 회원 주식 정보 조회
-  /// GET /cocobuffet/v1/members/{memberId}/stocks
-  Future<ApiResponse<MemberStockResponse>> getMemberStocks(int memberId) async {
+  /// GET /cocobuffett/v1/members/{memberId}/stocks
+  Future<ApiResponse<MemberStockResponse>> getMemberStocks(String memberId) async {
     try {
-      final response = await _dio.get('/cocobuffet/v1/members/$memberId/stocks');
+      final response = await _dio.get('/cocobuffett/v1/members/$memberId/stocks');
 
       return ApiResponse.fromJson(
         response.data,
@@ -96,10 +96,10 @@ class ApiClient {
   }
 
   /// 거래 가능 주식 리스트 조회
-  /// GET /cocobuffet/v1/stocks/list
+  /// GET /cocobuffett/v1/stocks/list
   Future<ApiResponse<List<TradableStockResponse>>> getTradableStocks() async {
     try {
-      final response = await _dio.get('/cocobuffet/v1/stocks/list');
+      final response = await _dio.get('/cocobuffett/v1/stocks/list');
 
       return ApiResponse.fromJson(
         response.data,
@@ -113,11 +113,11 @@ class ApiClient {
   }
 
   /// 주식 거래 (매수/매도)
-  /// POST /cocobuffet/v1/stocks/trade
+  /// POST /cocobuffett/v1/stocks/trade
   Future<ApiResponse<dynamic>> tradeStock(TradeStockRequest request) async {
     try {
       final response = await _dio.post(
-        '/cocobuffet/v1/stocks/trade',
+        '/cocobuffett/v1/stocks/trade',
         data: request.toJson(),
       );
 
@@ -148,7 +148,7 @@ class ApiClient {
   }
 
   /// 내가 보유한 아이템 조회
-  /// GET /cocobuffet/v1/items/owned/me
+  /// GET /cocobuffett/v1/items/owned/me
   Future<ApiResponse<List<ItemResponse>>> getOwnedItems() async {
     try {
       final response = await _dio.get('/cocobuffett/v1/items/owned/me');
@@ -182,12 +182,12 @@ class ApiClient {
   }
 
   /// 아이템 구매
-  /// POST /cocobuffet/v1/items/purchase
-  Future<ApiResponse<PurchaseItemResponse>> purchaseItem(int itemId) async {
+  /// POST /cocobuffett/v1/items/purchase
+  Future<ApiResponse<PurchaseItemResponse>> purchaseItem(String itemId) async {
     try {
       final request = PurchaseItemRequest(itemId: itemId);
       final response = await _dio.post(
-        '/cocobuffet/v1/items/purchase',
+        '/cocobuffett/v1/items/purchase',
         data: request.toJson(),
       );
 
@@ -201,7 +201,7 @@ class ApiClient {
   }
 
   /// 회원가입
-  /// POST /cocobuffet/v1/members/signup
+  /// POST /cocobuffett/v1/members/signup
   Future<ApiResponse<dynamic>> signup(SignupRequest request) async {
     try {
       final response = await _dio.post(

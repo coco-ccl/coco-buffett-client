@@ -11,9 +11,6 @@ sealed class StockEvent with _$StockEvent {
     required String symbol,
     required int quantity,
   }) = _SellStock;
-  const factory StockEvent.updatePrices() = _UpdatePrices;
-  const factory StockEvent.triggerEvent(models.StockEventModel event) = _TriggerEvent;
-  const factory StockEvent.clearEvent() = _ClearEvent;
   const factory StockEvent.selectStock(String symbol) = _SelectStock;
   const factory StockEvent.stocksUpdated(List<Stock> stocks) = _StocksUpdated;
   const factory StockEvent.cashUpdated(int cash) = _CashUpdated;

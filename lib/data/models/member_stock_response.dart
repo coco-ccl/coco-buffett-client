@@ -25,11 +25,17 @@ class StockDto {
   final String name; // 주식 이름
   final String ticker; // 주식 티커
   final int quantity; // 보유 수량 (주)
+  @JsonKey(name: 'current_price')
+  final int currentPrice; // 현재 주가 (원)
+  @JsonKey(name: 'avg_price')
+  final int? avgPrice; // 평균 매수가 (원) - 추후 추가 예정
 
   StockDto({
     required this.name,
     required this.ticker,
     required this.quantity,
+    required this.currentPrice,
+    this.avgPrice,
   });
 
   factory StockDto.fromJson(Map<String, dynamic> json) =>

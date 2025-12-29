@@ -12,15 +12,33 @@ import '../game/sprites/hair.dart';
 import '../game/sprites/shoes.dart';
 import '../game/sprites/top.dart';
 import '../data/repositories/item_repository.dart';
+import '../data/repositories/asset_repository.dart';
 
-class ShopPage extends StatefulWidget {
+/// ShopPage Wrapper - BLoC 제공
+class ShopPage extends StatelessWidget {
   const ShopPage({super.key});
 
   @override
-  State<ShopPage> createState() => _ShopPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => ShopBloc(
+        assetRepository: context.read<AssetRepository>(),
+        itemRepository: context.read<ItemRepository>(),
+      )..add(const ShopEvent.started()),
+      child: const _ShopPageContent(),
+    );
+  }
 }
 
-class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin {
+/// ShopPage 실제 내용
+class _ShopPageContent extends StatefulWidget {
+  const _ShopPageContent();
+
+  @override
+  State<_ShopPageContent> createState() => _ShopPageState();
+}
+
+class _ShopPageState extends State<_ShopPageContent> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   Map<String, List<GameItem>> _itemsByCategory = {};
   Set<String> _equippedItemIds = {}; // 착용 중인 아이템 ID 세트
@@ -520,9 +538,38 @@ class _ShopPageState extends State<ShopPage> with SingleTickerProviderStateMixin
         return;
       }
 
-      // TODO: 아이템 구매 로직 구현 필요
-      // ItemRepository를 통한 구매 API 호출 필요
-      // 지금은 일단 스킵하고 착용만 진행
+      // 아이템 구매 처리
+      try {
+        final itemRepository = context.read<ItemRepository>();
+        final assetRepository = context.read<AssetRepository>();
+
+        // 1. 서버에 구매 요청 (ItemRepository)
+        final remainingDeposit = await itemRepository.purchaseItem(item.itemId);
+
+        // 2. AssetRepository 현금 업데이트
+        // 서버에서 받은 잔여 예치금으로 AssetRepository refresh
+        await assetRepository.refresh();
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  '구매 실패: ${e.toString()}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
     }
 
     // 아이템 착용 (PlayerBloc에 이벤트 전송)

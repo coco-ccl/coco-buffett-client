@@ -13,7 +13,9 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
   StreamSubscription? _cashSubscription;
   StreamSubscription? _stocksSubscription;
 
-  AssetBloc({required this.assetRepository}) : super(_initState) {
+  AssetBloc({
+    required this.assetRepository,
+  }) : super(_initState) {
     on<_Started>(_onStarted);
     on<_DepositChanged>(_onDepositChanged);
     on<_ItemPurchased>(_onItemPurchased);
@@ -45,7 +47,7 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
     _Started event,
     Emitter<AssetState> emit,
   ) async {
-    // Repository에서 현재 데이터 가져오기
+    // Repository에서 현재 데이터 가져오기 (이미 초기화됨)
     final currentCash = assetRepository.currentCash;
     final currentStocks = assetRepository.myStocks;
 

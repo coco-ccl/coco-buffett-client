@@ -105,7 +105,7 @@ class ItemRepository {
   }
 
   /// 아이템 구매 (API 호출만)
-  Future<int> _purchaseItemAPI(int itemId) async {
+  Future<int> _purchaseItemAPI(String itemId) async {
     print('[ItemRepository] 아이템 구매 시작: itemId=$itemId');
 
     if (_useMockData) {
@@ -127,7 +127,7 @@ class ItemRepository {
   }
 
   /// 아이템 구매 (Public API - 기존 코드 호환성 유지)
-  Future<int> purchaseItem(int itemId) async {
+  Future<int> purchaseItem(String itemId) async {
     return _purchaseItemAPI(itemId);
   }
 

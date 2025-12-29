@@ -5,15 +5,34 @@ import 'package:intl/intl.dart';
 import 'stock_bloc/stock_bloc.dart';
 import 'widgets/candlestick_chart.dart';
 import '../widgets/pixel_widgets.dart';
+import '../data/repositories/asset_repository.dart';
+import '../data/repositories/stock_repository.dart';
 
-class StockPage extends StatefulWidget {
+/// StockPage Wrapper - BLoC 제공
+class StockPage extends StatelessWidget {
   const StockPage({super.key});
 
   @override
-  State<StockPage> createState() => _StockPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => StockBloc(
+        assetRepository: context.read<AssetRepository>(),
+        stockRepository: context.read<StockRepository>(),
+      )..add(const StockEvent.started()),
+      child: const _StockPageContent(),
+    );
+  }
 }
 
-class _StockPageState extends State<StockPage> {
+/// StockPage 실제 내용
+class _StockPageContent extends StatefulWidget {
+  const _StockPageContent();
+
+  @override
+  State<_StockPageContent> createState() => _StockPageState();
+}
+
+class _StockPageState extends State<_StockPageContent> {
   final TextEditingController _quantityController = TextEditingController();
   bool _isBuyMode = true;
   bool _showChart = false;
@@ -157,11 +176,6 @@ class _StockPageState extends State<StockPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // 이벤트 배너
-            if (data.activeEvent != null) _buildEventBanner(data.activeEvent!),
-
-            const SizedBox(height: 16),
-
             // 포트폴리오 요약
             _buildPortfolioSummary(
                 data, portfolioValue.toDouble(), totalProfit.toDouble(), totalProfitRate.toDouble()),
@@ -196,82 +210,6 @@ class _StockPageState extends State<StockPage> {
               ],
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEventBanner(dynamic event) {
-    return ClipPath(
-      clipper: PixelClipper(notchSize: 6),
-      child: CustomPaint(
-        painter: PixelBorderPainter(
-          borderColor: Colors.black,
-          borderWidth: 3,
-          notchSize: 6,
-          has3DEffect: true,
-        ),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: event.isPositive
-                  ? [Colors.green.shade400, Colors.blue.shade500, Colors.purple.shade500]
-                  : [Colors.red.shade500, Colors.pink.shade500, Colors.orange.shade500],
-            ),
-          ),
-          child: Row(
-            children: [
-              Text(
-                event.title.split(' ')[0],
-                style: const TextStyle(fontSize: 24),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      event.title.substring(event.title.indexOf(' ') + 1),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      event.description,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '이벤트 진행중',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.75),
-                      fontSize: 12,
-                    ),
-                  ),
-                  const Text(
-                    '⏰ 진행중',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'monospace',
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -386,11 +324,6 @@ class _StockPageState extends State<StockPage> {
 
   Widget _buildStockItem(stock, StockData data) {
     final isSelected = data.selectedStock == stock.symbol;
-    final isAffectedByEvent = data.activeEvent != null &&
-        !stock.isLeverage &&
-        ((data.activeEvent!.effect.type.toString().contains('Up') &&
-                data.activeEvent!.effect.sectors.contains(stock.symbol)) ||
-            data.activeEvent!.effect.type.toString().contains('all'));
 
     return GestureDetector(
       onTap: () {
@@ -409,9 +342,7 @@ class _StockPageState extends State<StockPage> {
             ),
             child: Container(
               padding: const EdgeInsets.all(12),
-              color: isSelected
-                  ? const Color(0xFFE3F2FD)
-                  : (isAffectedByEvent ? const Color(0xFFE8F5E9) : Colors.white),
+              color: isSelected ? const Color(0xFFE3F2FD) : Colors.white,
               child: Row(
                 children: [
                   Expanded(
@@ -442,26 +373,6 @@ class _StockPageState extends State<StockPage> {
                                 child: Text(
                                   stock.leverageType == 'long' ? '2X↗' : '2X↙',
                                   style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                            if (isAffectedByEvent) ...[
-                              const SizedBox(width: 4),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: const BoxDecoration(
-                                  color: Colors.green,
-                                ),
-                                child: const Text(
-                                  'HOT!',
-                                  style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,

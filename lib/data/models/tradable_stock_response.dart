@@ -7,6 +7,7 @@ part 'tradable_stock_response.g.dart';
 class TradableStockResponse {
   final String name; // 주식 이름
   final String ticker; // 주식 티커
+  @JsonKey(name: 'current_price')
   final int currentPrice; // 현재 주가 (원)
 
   TradableStockResponse({

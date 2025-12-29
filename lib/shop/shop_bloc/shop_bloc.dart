@@ -42,7 +42,7 @@ class ShopBloc extends Bloc<ShopEvent, ShopState> {
     emit(const ShopState.loading());
 
     try {
-      // 현재 상태 가져오기
+      // 현재 상태 가져오기 (Repository는 이미 초기화됨)
       final currentCash = assetRepository.currentCash;
       final ownedItems = itemRepository.ownedItems;
       final allItems = itemRepository.allItems;

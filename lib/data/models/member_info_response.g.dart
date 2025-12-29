@@ -8,16 +8,14 @@ part of 'member_info_response.dart';
 
 MemberInfoResponse _$MemberInfoResponseFromJson(Map<String, dynamic> json) =>
     MemberInfoResponse(
-      memberNo: (json['memberNo'] as num).toInt(),
       id: json['id'] as String,
       nickname: json['nickname'] as String,
-      profileImageUrl: json['profileImageUrl'] as String?,
+      profileImageUrl: json['profile_image_url'] as String?,
     );
 
 Map<String, dynamic> _$MemberInfoResponseToJson(MemberInfoResponse instance) =>
     <String, dynamic>{
-      'memberNo': instance.memberNo,
       'id': instance.id,
       'nickname': instance.nickname,
-      'profileImageUrl': instance.profileImageUrl,
+      'profile_image_url': instance.profileImageUrl,
     };

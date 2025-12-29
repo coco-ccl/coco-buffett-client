@@ -15,7 +15,6 @@ sealed class StockData with _$StockData {
     @Default([]) List<Stock> stocks,
     @Default([]) List<PortfolioItem> portfolio,
     @Default({}) Map<String, List<PriceHistory>> priceHistory,
-    models.StockEventModel? activeEvent,
     String? selectedStock,
     String? errorMessage,
   }) = _StockData;
