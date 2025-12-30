@@ -71,7 +71,7 @@ class _MinigamePageState extends State<MinigamePage>
 
     // 서버 API 호출하여 자산 추가
     final assetRepository = context.read<AssetRepository>();
-    final reward = _tapCount * 10000; // 터치당 100원
+    final reward = _tapCount * 1000; // 터치당 1000원
     await assetRepository.addCashFromServer(reward);
 
     // 결과 다이얼로그 표시
