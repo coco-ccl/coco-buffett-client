@@ -99,7 +99,7 @@ class AssetRepository {
                 name: dto.name,
                 ticker: dto.ticker,
                 quantity: dto.quantity,
-                avgPrice: dto.avgPrice ?? dto.currentPrice, // avgPrice가 없으면 currentPrice 사용
+                avgPrice: dto.averageCost ?? dto.currentPrice, // avgPrice가 없으면 currentPrice 사용
               ))
           .toList(),
       totalSpent: 0, // TODO: 서버에서 제공하는 경우 추가

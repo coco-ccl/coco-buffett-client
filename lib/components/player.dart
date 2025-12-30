@@ -14,7 +14,7 @@ class Player extends PositionComponent
   Map<Direction, ui.Image>? _imagesWalk1; // 걷기 프레임 1
   Map<Direction, ui.Image>? _imagesWalk2; // 걷기 프레임 2
 
-  static const double speed = 150.0;
+  static const double speed = 250.0; // 150 -> 250으로 증가
   static const double spriteScale = 1.5;
   static const int pixelSize = 32;
 

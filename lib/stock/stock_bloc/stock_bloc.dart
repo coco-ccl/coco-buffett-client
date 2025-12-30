@@ -19,6 +19,9 @@ class StockBloc extends Bloc<StockEvent, StockState> {
   StreamSubscription? _stocksSubscription;
   StreamSubscription? _portfolioSubscription;
 
+  // 이전 가격 저장 (등락율 계산용)
+  final Map<String, double> _previousPrices = {};
+
   StockBloc({this.assetRepository, this.stockRepository}) : super(_initState) {
     on<_Started>(_onStarted);
     on<_BuyStock>(_onBuyStock);
@@ -43,14 +46,27 @@ class StockBloc extends Bloc<StockEvent, StockState> {
     // StockRepository의 tradableStocksStream 구독
     if (stockRepository != null) {
       _stocksSubscription = stockRepository!.tradableStocksStream.listen((tradableStocks) {
-        // TradableStock을 Stock 모델로 변환
-        final updatedStocks = tradableStocks.map((ts) => Stock(
-          symbol: ts.ticker,
-          name: ts.name,
-          price: ts.currentPrice.toDouble(),
-          change: 0.0,
-          volume: 1000000,
-        )).toList();
+        // TradableStock을 Stock 모델로 변환 (등락율 계산 포함)
+        final updatedStocks = tradableStocks.map((ts) {
+          final currentPrice = ts.currentPrice.toDouble();
+          final previousPrice = _previousPrices[ts.ticker];
+
+          // 등락율 계산: ((현재가 - 이전가) / 이전가) * 100
+          final change = previousPrice != null
+              ? ((currentPrice - previousPrice) / previousPrice) * 100
+              : 0.0;
+
+          // 현재 가격을 다음 비교를 위해 저장
+          _previousPrices[ts.ticker] = currentPrice;
+
+          return Stock(
+            symbol: ts.ticker,
+            name: ts.name,
+            price: currentPrice,
+            change: change,
+            volume: 1000000,
+          );
+        }).toList();
 
         // Event로 전달
         add(StockEvent.stocksUpdated(updatedStocks));

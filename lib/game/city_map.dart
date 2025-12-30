@@ -6,6 +6,7 @@ import 'buildings/empire_building.dart';
 import 'buildings/hotel_building.dart';
 import 'buildings/department_store.dart' show DepartmentStore, DepartmentColorPresets, DepartmentStoreDoor;
 import 'buildings/stock_exchange.dart' show StockExchange, StockExchangeColorPresets, StockExchangeDoor;
+import 'buildings/arcade.dart' show Arcade, ArcadeColorPresets, ArcadeDoor;
 import 'buildings/gangnam_tower.dart';
 import 'buildings/apartment_building.dart';
 import 'components/sky_background.dart';
@@ -17,6 +18,7 @@ class CityMap extends PositionComponent with HasGameReference {
   final List<Building> _buildings = [];
   DepartmentStore? _departmentStore;
   StockExchange? _stockExchange;
+  Arcade? _arcade;
   RoadLayer? _sidewalkLayer;
   RoadLayer? _asphaltLayer;
   late double _groundY;
@@ -125,6 +127,22 @@ class CityMap extends PositionComponent with HasGameReference {
     await add(StockExchangeDoor(
       position: _stockExchange!.getDoorPosition(),
       size: _stockExchange!.getDoorSize(),
+    ));
+
+    _arcade = Arcade(
+      position: Vector2(currentX + 50, _groundY),
+      width: 200,
+      height: 180,
+      buildingScale: buildingScale,
+      colorSet: ArcadeColorPresets.classic,
+    );
+    await addBuilding(_arcade!);
+    currentX += 50;
+
+    // Arcade 문 영역 추가 (별도 컴포넌트로)
+    await add(ArcadeDoor(
+      position: _arcade!.getDoorPosition(),
+      size: _arcade!.getDoorSize(),
     ));
 
     await addBuilding(GangnamTower(
