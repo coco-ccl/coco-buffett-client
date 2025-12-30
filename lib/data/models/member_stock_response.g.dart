@@ -23,7 +23,7 @@ StockDto _$StockDtoFromJson(Map<String, dynamic> json) => StockDto(
   ticker: json['ticker'] as String,
   quantity: (json['quantity'] as num).toInt(),
   currentPrice: (json['current_price'] as num).toInt(),
-  avgPrice: (json['avg_price'] as num?)?.toInt(),
+  averageCost: (json['average_cost'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$StockDtoToJson(StockDto instance) => <String, dynamic>{
@@ -31,5 +31,5 @@ Map<String, dynamic> _$StockDtoToJson(StockDto instance) => <String, dynamic>{
   'ticker': instance.ticker,
   'quantity': instance.quantity,
   'current_price': instance.currentPrice,
-  'avg_price': instance.avgPrice,
+  'average_cost': instance.averageCost,
 };
