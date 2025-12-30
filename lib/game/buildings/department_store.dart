@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/collisions.dart';
@@ -143,6 +142,7 @@ class DepartmentStore extends Building {
     _drawClassicWindowGroups(canvas);
     _drawCentralFeature(canvas);
     _drawRoofAndLighting(canvas);
+    _drawSign(canvas);
   }
 
   void _drawBuildingStructure(Canvas canvas) {
@@ -268,5 +268,64 @@ class DepartmentStore extends Building {
         colors: [colorSet.roofBorder.withValues(alpha: 0.15), Colors.transparent],
       ).createShader(Rect.fromLTWH(0, 0, size.x, size.y * 0.3));
     canvas.drawRect(Rect.fromLTWH(0, 0, size.x, size.y * 0.3), glowPaint);
+  }
+
+  void _drawSign(Canvas canvas) {
+    final centerX = size.x / 2;
+    final doorH = pSize * 20 * buildingScale;
+    final signY = size.y - doorH - pSize * 18 * buildingScale;
+
+    // 간판 배경
+    final signW = pSize * 24 * buildingScale;
+    final signH = pSize * 8 * buildingScale;
+    final signRect = Rect.fromLTWH(
+      centerX - signW / 2,
+      signY,
+      signW,
+      signH,
+    );
+
+    // 간판 그림자
+    canvas.drawRect(
+      signRect.translate(pSize * buildingScale, pSize * buildingScale),
+      Paint()..color = colorSet.outline.withValues(alpha: 0.3),
+    );
+
+    // 간판 배경 (우드 느낌)
+    canvas.drawRect(
+      signRect,
+      Paint()..color = const Color(0xFF5D4037),
+    );
+
+    // 간판 테두리
+    canvas.drawRect(
+      signRect,
+      Paint()
+        ..color = const Color(0xFF3E2723)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = pSize * 0.8 * buildingScale,
+    );
+
+    // '상점' 텍스트
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: '상점',
+        style: TextStyle(
+          color: const Color(0xFFFFF8E1),
+          fontSize: pSize * 5 * buildingScale,
+          fontWeight: FontWeight.bold,
+          letterSpacing: pSize * buildingScale,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset(
+        centerX - textPainter.width / 2,
+        signY + (signH - textPainter.height) / 2,
+      ),
+    );
   }
 }
