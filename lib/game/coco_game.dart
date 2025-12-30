@@ -14,6 +14,7 @@ class CocoGame extends FlameGame with HasKeyboardHandlerComponents, HasCollision
   final PlayerBloc playerBloc;
   final Function()? onEnterShop;
   final Function()? onEnterStock;
+  final Function()? onEnterArcade;
   KeyboardInputHandler? _keyboardHandler;
   late CityMap cityMap;
   Player? _player;
@@ -23,6 +24,7 @@ class CocoGame extends FlameGame with HasKeyboardHandlerComponents, HasCollision
     required this.playerBloc,
     this.onEnterShop,
     this.onEnterStock,
+    this.onEnterArcade,
   }) : super(
     world: World(),
     camera: CameraComponent(),

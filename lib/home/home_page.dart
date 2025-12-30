@@ -60,6 +60,11 @@ class _HomePageState extends State<_HomePageContent> {
             context.push('/stock');
           }
         },
+        onEnterArcade: () {
+          if (mounted) {
+            context.push('/minigame');
+          }
+        },
       );
       _isGameInitialized = true;
     }

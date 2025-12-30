@@ -270,7 +270,7 @@ class _StockPageState extends State<_StockPageContent> {
               Expanded(
                 child: _buildSummaryItem(
                   '총 손익금',
-                  '${totalProfit >= 0 ? '+' : ''}₩${_formatPrice(totalProfit.abs())}',
+                  '${totalProfit >= 0 ? '+' : ''}₩${_formatPrice(totalProfit)}',
                   totalProfit >= 0 ? Colors.green : Colors.red,
                 ),
               ),

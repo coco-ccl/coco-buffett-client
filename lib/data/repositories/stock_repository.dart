@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import '../api/api_client.dart';
 import '../models/tradable_stock_response.dart';
 import '../models/trade_stock_request.dart';
@@ -11,6 +12,29 @@ class StockRepository {
 
   // Private 캐시 변수
   List<TradableStock> _tradableStocks = [];
+
+  // Mock 데이터용 기준 가격 (초기값)
+  final Map<String, int> _basePrices = {
+    'AAPL': 175000,
+    'TSLA': 240000,
+    'MSFT': 370000,
+    'NVDA': 450000,
+    'AMZN': 155000,
+    'GOOGL': 140000,
+  };
+
+  // Mock 데이터용 현재 가격 (등락율 시뮬레이션)
+  final Map<String, int> _mockPrices = {
+    'AAPL': 175000,
+    'TSLA': 240000,
+    'MSFT': 370000,
+    'NVDA': 450000,
+    'AMZN': 155000,
+    'GOOGL': 140000,
+  };
+
+  // Random 생성기
+  final _random = Random();
 
   // StreamController
   final _tradableStocksController = StreamController<List<TradableStock>>.broadcast();
@@ -118,38 +142,50 @@ class StockRepository {
     );
   }
 
-  /// Mock 데이터 반환
+  /// Mock 데이터 반환 (가격 변동 시뮬레이션)
   List<TradableStock> _getMockTradableStocks() {
-    return const [
+    // 각 주식의 가격을 -2% ~ +2% 범위에서 랜덤하게 변동
+    _mockPrices.forEach((ticker, currentPrice) {
+      // -0.02 ~ +0.02 사이의 랜덤 변동률
+      final changeRate = (_random.nextDouble() - 0.5) * 0.04; // -2% ~ +2%
+      final priceChange = (currentPrice * changeRate).toInt();
+      final newPrice = currentPrice + priceChange;
+
+      final basePrice = _basePrices[ticker]!;
+      // 기준 가격의 50% ~ 200% 범위로 제한
+      _mockPrices[ticker] = newPrice.clamp((basePrice * 0.5).toInt(), (basePrice * 2).toInt());
+    });
+
+    return [
       TradableStock(
         name: 'Apple Inc.',
         ticker: 'AAPL',
-        currentPrice: 175000,
+        currentPrice: _mockPrices['AAPL']!,
       ),
       TradableStock(
         name: 'Tesla Inc.',
         ticker: 'TSLA',
-        currentPrice: 240000,
+        currentPrice: _mockPrices['TSLA']!,
       ),
       TradableStock(
         name: 'Microsoft Corporation',
         ticker: 'MSFT',
-        currentPrice: 370000,
+        currentPrice: _mockPrices['MSFT']!,
       ),
       TradableStock(
         name: 'NVIDIA Corporation',
         ticker: 'NVDA',
-        currentPrice: 450000,
+        currentPrice: _mockPrices['NVDA']!,
       ),
       TradableStock(
         name: 'Amazon.com Inc.',
         ticker: 'AMZN',
-        currentPrice: 155000,
+        currentPrice: _mockPrices['AMZN']!,
       ),
       TradableStock(
         name: 'Alphabet Inc.',
         ticker: 'GOOGL',
-        currentPrice: 140000,
+        currentPrice: _mockPrices['GOOGL']!,
       ),
     ];
   }
