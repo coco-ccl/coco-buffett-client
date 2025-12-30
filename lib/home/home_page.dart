@@ -227,6 +227,17 @@ class _HomePageState extends State<_HomePageContent> {
               child: const Icon(Icons.catching_pokemon),
             ),
           ),
+          // 똥피하기 게임 버튼
+          Positioned(
+            top: 440,
+            left: 20,
+            child: FloatingActionButton(
+              heroTag: 'dodge_poop_button',
+              onPressed: () => context.push('/dodge-poop'),
+              backgroundColor: const Color(0xFF8B4513),
+              child: const Icon(Icons.directions_run),
+            ),
+          ),
           // 주식창 버튼
           Positioned(
             top: 20,
