@@ -220,10 +220,33 @@ class AssetRepository {
     return true;
   }
 
-  /// 현금 추가
+  /// 현금 추가 (로컬)
   Future<void> addCash(int amount) async {
     _currentCash += amount;
     _cashController.add(_currentCash);
+  }
+
+  /// 현금 추가 (서버 API 호출)
+  Future<int> addCashFromServer(int amount) async {
+    try {
+      final response = await _apiClient.addMoney(amount);
+
+      if (response.code == 0 && response.data != null) {
+        // 서버에서 반환한 최신 잔액으로 업데이트
+        _currentCash = response.data!.deposit;
+        _cashController.add(_currentCash);
+        print('[AssetRepository] 돈 추가 성공: $amount원, 현재 잔액: $_currentCash원');
+        return _currentCash;
+      } else {
+        throw Exception(response.message);
+      }
+    } catch (e) {
+      print('[AssetRepository] 돈 추가 실패: $e');
+      // 서버 호출 실패 시 로컬에만 추가
+      _currentCash += amount;
+      _cashController.add(_currentCash);
+      return _currentCash;
+    }
   }
 
   /// 리소스 정리
