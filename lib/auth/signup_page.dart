@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../data/repositories/auth_repository.dart';
+import '../data/repositories/member_repository.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -41,6 +42,7 @@ class _SignupPageState extends State<SignupPage> {
 
     try {
       final authRepository = context.read<AuthRepository>();
+      final memberRepository = context.read<MemberRepository>();
       final memberId = _memberIdController.text.trim();
       final password = _passwordController.text;
 
@@ -57,6 +59,11 @@ class _SignupPageState extends State<SignupPage> {
           memberId: memberId,
           password: password,
         );
+      }
+
+      if (mounted) {
+        // 3. 회원 정보 로드 및 저장
+        await memberRepository.loadCurrentMemberInfo();
       }
 
       if (mounted) {
@@ -78,7 +85,7 @@ class _SignupPageState extends State<SignupPage> {
           ),
         );
 
-        // 3. 홈 화면으로 이동 (HomePage에서 Repository 초기화)
+        // 4. 홈 화면으로 이동 (HomePage에서 Repository 초기화)
         context.go('/');
       }
     } catch (e) {
