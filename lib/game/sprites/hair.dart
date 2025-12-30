@@ -41,16 +41,16 @@ class HairSprites {
 
   static void _drawHairFront(List<List<Color>> pixels, Color h, Color o, String style) {
     // 1:1 비율 머리 (row 0-15, col 8-23 = 16x16)
-    // 머리카락 외곽선 (row 0부터 시작)
-    for (int x = 12; x <= 19; x++) pixels[0][x] = o;  // row 0: 상단
-    pixels[1][10] = o; pixels[1][11] = o;
-    pixels[1][20] = o; pixels[1][21] = o;
+    // 머리카락 외곽선 (row 0부터 시작, 더 둥글게)
+    for (int x = 13; x <= 18; x++) pixels[0][x] = o;  // row 0: 상단 (더 좁게)
+    pixels[1][11] = o; pixels[1][12] = o;
+    pixels[1][19] = o; pixels[1][20] = o;
     pixels[2][9] = o; pixels[2][22] = o;
     pixels[3][8] = o; pixels[3][23] = o;
     pixels[4][7] = o; pixels[4][24] = o;
 
-    // 머리카락 채우기 (풍성하게)
-    for (int x = 12; x <= 19; x++) pixels[1][x] = h;
+    // 머리카락 채우기 (풍성하게, 둥글게)
+    for (int x = 13; x <= 18; x++) pixels[1][x] = h;
     for (int x = 10; x <= 21; x++) pixels[2][x] = h;
     for (int x = 9; x <= 22; x++) pixels[3][x] = h;
     for (int x = 8; x <= 23; x++) pixels[4][x] = h;
@@ -62,17 +62,16 @@ class HairSprites {
       pixels[y][24] = o;
     }
 
-    // 옆머리 (얼굴 양옆)
-    for (int y = 7; y <= 9; y++) {
-      pixels[y][7] = o;
-      pixels[y][8] = h;
-      pixels[y][9] = h;
-      pixels[y][22] = h;
-      pixels[y][23] = h;
-      pixels[y][24] = o;
-    }
-
     if (style == 'long') {
+      // 긴 머리 - 옆머리 풍성하게
+      for (int y = 7; y <= 9; y++) {
+        pixels[y][7] = o;
+        pixels[y][8] = h;
+        pixels[y][9] = h;
+        pixels[y][22] = h;
+        pixels[y][23] = h;
+        pixels[y][24] = o;
+      }
       // 긴 머리 - 더 아래로
       for (int y = 10; y <= 14; y++) {
         pixels[y][7] = o;
@@ -84,10 +83,25 @@ class HairSprites {
       }
       pixels[15][8] = o; pixels[15][23] = o;
     } else if (style == 'pomade') {
-      // 포마드 - 뒤로 넘김
-      pixels[7][7] = o; pixels[7][8] = h;
-      pixels[7][23] = h; pixels[7][24] = o;
+      // 포마드 - 옆머리 얇게
+      for (int y = 7; y <= 9; y++) {
+        pixels[y][7] = o;
+        pixels[y][8] = h;
+        pixels[y][9] = h;  // 비어있던 부분 채우기
+        pixels[y][22] = h;  // 비어있던 부분 채우기
+        pixels[y][23] = h;
+        pixels[y][24] = o;
+      }
     } else {
+      // 짧은 머리 - 옆머리 얇게
+      for (int y = 7; y <= 9; y++) {
+        pixels[y][7] = o;
+        pixels[y][8] = h;
+        pixels[y][9] = h;  // 비어있던 부분 채우기
+        pixels[y][22] = h;  // 비어있던 부분 채우기
+        pixels[y][23] = h;
+        pixels[y][24] = o;
+      }
       // 짧은 머리 - 앞머리
       pixels[7][10] = h; pixels[7][11] = h; pixels[7][12] = h;
       pixels[7][19] = h; pixels[7][20] = h; pixels[7][21] = h;
@@ -95,10 +109,10 @@ class HairSprites {
   }
 
   static void _drawHairBack(List<List<Color>> pixels, Color h, Color o, String style) {
-    // 뒷모습 - 머리 전체 덮기 (1:1 비율)
-    for (int x = 12; x <= 19; x++) pixels[0][x] = o;
-    pixels[1][10] = o; pixels[1][11] = o;
-    pixels[1][20] = o; pixels[1][21] = o;
+    // 뒷모습 - 머리 전체 덮기 (1:1 비율, 더 둥글게)
+    for (int x = 13; x <= 18; x++) pixels[0][x] = o;
+    pixels[1][11] = o; pixels[1][12] = o;
+    pixels[1][19] = o; pixels[1][20] = o;
     pixels[2][9] = o; pixels[2][22] = o;
     pixels[3][8] = o; pixels[3][23] = o;
     for (int y = 4; y <= 12; y++) {
@@ -108,8 +122,8 @@ class HairSprites {
     pixels[13][8] = o; pixels[13][23] = o;
     pixels[14][9] = o; pixels[14][22] = o;
 
-    // 머리카락 채우기 (전체)
-    for (int x = 12; x <= 19; x++) pixels[1][x] = h;
+    // 머리카락 채우기 (전체, 둥글게)
+    for (int x = 13; x <= 18; x++) pixels[1][x] = h;
     for (int x = 10; x <= 21; x++) pixels[2][x] = h;
     for (int x = 9; x <= 22; x++) pixels[3][x] = h;
     for (int y = 4; y <= 12; y++) {
@@ -133,43 +147,125 @@ class HairSprites {
   }
 
   static void _drawHairSide(List<List<Color>> pixels, Color h, Color o, String style, bool flip) {
-    int base = flip ? 10 : 9;
+    // 몸통 중심 맞춤: 왼쪽 14.5, 오른쪽 16.5
+    // 뒷통수만 둥글게, 앞머리는 직선, 얼굴 면적 13픽셀
 
-    // 측면 - 둥근 머리 (1:1 비율)
-    for (int x = base + 3; x <= base + 8; x++) pixels[0][x] = o;
-    pixels[1][base + 2] = o; pixels[1][base + 9] = o;
-    pixels[2][base + 1] = o; pixels[2][base + 10] = o;
-    pixels[3][base] = o; pixels[3][base + 11] = o;
-    for (int y = 4; y <= 7; y++) {
-      pixels[y][base - 1] = o;
-      pixels[y][base + 12] = o;
-    }
+    if (flip) {
+      // 오른쪽 방향: 얼굴 col 11-22 (12픽셀), 뒷머리 풍성하게
+      // Row 0: 두상 상단 (둥글게)
+      for (int x = 12; x <= 21; x++) pixels[0][x] = o;
 
-    // 머리카락 채우기
-    for (int x = base + 3; x <= base + 8; x++) pixels[1][x] = h;
-    for (int x = base + 2; x <= base + 9; x++) pixels[2][x] = h;
-    for (int x = base + 1; x <= base + 10; x++) pixels[3][x] = h;
-    for (int y = 4; y <= 7; y++) {
-      for (int x = base; x <= base + 11; x++) {
-        pixels[y][x] = h;
+      // Row 1: 더 둥글게 확장
+      pixels[1][10] = o;
+      for (int x = 11; x <= 22; x++) pixels[1][x] = h;
+      pixels[1][23] = o;
+
+      // Row 2-6: 전체 머리 (뒷머리 풍성하게)
+      for (int y = 2; y <= 6; y++) {
+        pixels[y][9] = o;
+        for (int x = 10; x <= 23; x++) pixels[y][x] = h;
+        pixels[y][24] = o;
       }
-    }
 
-    if (style == 'long') {
-      // 긴 머리 측면
-      int outerX = flip ? base + 12 : base - 1;
-      for (int y = 8; y <= 14; y++) {
-        pixels[y][outerX] = o;
-        pixels[y][outerX + (flip ? -1 : 1)] = h;
-        pixels[y][outerX + (flip ? -2 : 2)] = h;
+      // 긴 머리
+      if (style == 'long') {
+        // Row 7-9: 뒷머리
+        for (int y = 7; y <= 9; y++) {
+          pixels[y][9] = o;
+          for (int x = 10; x <= 13; x++) pixels[y][x] = h;
+          pixels[y][14] = o;
+        }
+
+        // Row 10-12: 뒷통수 좁아짐
+        for (int y = 10; y <= 12; y++) {
+          pixels[y][9] = o;
+          for (int x = 10; x <= 12; x++) pixels[y][x] = h;
+          pixels[y][13] = o;
+        }
+
+        // Row 13
+        pixels[13][10] = o;
+        pixels[13][11] = h;
+        pixels[13][22] = h;
+        pixels[13][23] = o;
+
+        // Row 14-17: 긴 머리
+        for (int y = 14; y <= 17; y++) {
+          pixels[y][9] = o;
+          pixels[y][10] = h;
+          pixels[y][11] = h;
+          pixels[y][22] = h;
+          pixels[y][23] = h;
+          pixels[y][24] = o;
+        }
+        for (int x = 11; x <= 22; x++) pixels[18][x] = o;
+      } else {
+        // 짧은 머리 - 구렛나루 얇게
+        // Row 7-9: 뒷머리 (얇게)
+        for (int y = 7; y <= 9; y++) {
+          pixels[y][10] = o;
+          pixels[y][11] = h;
+          pixels[y][12] = o;
+        }
       }
-      pixels[15][outerX + (flip ? -1 : 1)] = o;
+
     } else {
-      // 짧은 머리/포마드 측면
-      int outerX = flip ? base + 12 : base - 1;
-      for (int y = 8; y <= 9; y++) {
-        pixels[y][outerX] = o;
-        pixels[y][outerX + (flip ? -1 : 1)] = h;
+      // 왼쪽 방향: 얼굴 col 9-20 (12픽셀), 뒷머리 풍성하게
+      // Row 0: 두상 상단 (둥글게)
+      for (int x = 10; x <= 19; x++) pixels[0][x] = o;
+
+      // Row 1: 더 둥글게 확장
+      pixels[1][8] = o;
+      for (int x = 9; x <= 20; x++) pixels[1][x] = h;
+      pixels[1][21] = o;
+
+      // Row 2-6: 전체 머리 (뒷머리 풍성하게)
+      for (int y = 2; y <= 6; y++) {
+        pixels[y][7] = o;
+        for (int x = 8; x <= 21; x++) pixels[y][x] = h;
+        pixels[y][22] = o;
+      }
+
+      // 긴 머리
+      if (style == 'long') {
+        // Row 7-9: 뒷머리
+        for (int y = 7; y <= 9; y++) {
+          pixels[y][17] = o;
+          for (int x = 18; x <= 21; x++) pixels[y][x] = h;
+          pixels[y][22] = o;
+        }
+
+        // Row 10-12: 뒷통수 좁아짐
+        for (int y = 10; y <= 12; y++) {
+          pixels[y][18] = o;
+          for (int x = 19; x <= 21; x++) pixels[y][x] = h;
+          pixels[y][22] = o;
+        }
+
+        // Row 13
+        pixels[13][9] = o;
+        pixels[13][10] = h;
+        pixels[13][20] = h;
+        pixels[13][21] = o;
+
+        // Row 14-17: 긴 머리
+        for (int y = 14; y <= 17; y++) {
+          pixels[y][7] = o;
+          pixels[y][8] = h;
+          pixels[y][9] = h;
+          pixels[y][20] = h;
+          pixels[y][21] = h;
+          pixels[y][22] = o;
+        }
+        for (int x = 9; x <= 20; x++) pixels[18][x] = o;
+      } else {
+        // 짧은 머리 - 구렛나루 얇게
+        // Row 7-9: 뒷머리 (얇게)
+        for (int y = 7; y <= 9; y++) {
+          pixels[y][19] = o;
+          pixels[y][20] = h;
+          pixels[y][21] = o;
+        }
       }
     }
   }

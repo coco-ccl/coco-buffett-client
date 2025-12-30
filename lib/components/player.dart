@@ -11,10 +11,16 @@ class Player extends PositionComponent
     with HasGameReference<CocoGame>, FlameBlocReader<PlayerBloc, PlayerState>, CollisionCallbacks {
   Map<Direction, ui.Image>? _images;
   PlayerData? _previousData;
+  Map<Direction, ui.Image>? _imagesWalk1; // 걷기 프레임 1
+  Map<Direction, ui.Image>? _imagesWalk2; // 걷기 프레임 2
 
   static const double speed = 150.0;
   static const double spriteScale = 1.5;
   static const int pixelSize = 32;
+
+  // 걷기 애니메이션
+  double _walkAnimationTime = 0.0;
+  static const double walkFrameDuration = 0.15; // 0.15초마다 프레임 전환
 
   Player() : super(
     size: Vector2(
@@ -67,12 +73,35 @@ class Player extends PositionComponent
 
   Future<void> _regenerateSprites() async {
     final data = bloc.state.data;
+
+    // 기본 idle 스프라이트
     _images = await SpriteLayerGenerator.generateAllDirections(
       faceId: data.faceId,
       hairId: data.hairId,
       topId: data.topId,
       bottomId: data.bottomId,
       shoesId: data.shoesId,
+      walkFrame: 0, // idle
+    );
+
+    // 걷기 프레임 1
+    _imagesWalk1 = await SpriteLayerGenerator.generateAllDirections(
+      faceId: data.faceId,
+      hairId: data.hairId,
+      topId: data.topId,
+      bottomId: data.bottomId,
+      shoesId: data.shoesId,
+      walkFrame: 1,
+    );
+
+    // 걷기 프레임 2
+    _imagesWalk2 = await SpriteLayerGenerator.generateAllDirections(
+      faceId: data.faceId,
+      hairId: data.hairId,
+      topId: data.topId,
+      bottomId: data.bottomId,
+      shoesId: data.shoesId,
+      walkFrame: 2,
     );
   }
 
@@ -81,6 +110,14 @@ class Player extends PositionComponent
     super.update(dt);
 
     final velocity = bloc.state.data.velocity ?? Vector2.zero();
+
+    // 걷기 애니메이션 업데이트
+    if (!velocity.isZero()) {
+      _walkAnimationTime += dt;
+    } else {
+      _walkAnimationTime = 0.0; // 정지 시 리셋
+    }
+
     if (velocity.isZero()) return;
 
     final displacement = velocity * speed * dt;
@@ -116,13 +153,29 @@ class Player extends PositionComponent
   @override
   void render(Canvas canvas) {
     if (_images == null) return;
+
     final direction = bloc.state.data.direction;
-    final image = _images![direction]!;
+    final velocity = bloc.state.data.velocity ?? Vector2.zero();
+
+    // 이동 중이면 걷기 애니메이션, 정지 시 idle
+    ui.Image? image;
+    if (velocity.isZero()) {
+      image = _images![direction];
+    } else {
+      // 걷기 애니메이션: 0.15초마다 프레임 전환
+      final frameIndex = (_walkAnimationTime / walkFrameDuration).floor() % 2;
+      if (frameIndex == 0) {
+        image = _imagesWalk1?[direction] ?? _images![direction];
+      } else {
+        image = _imagesWalk2?[direction] ?? _images![direction];
+      }
+    }
+
     final paint = Paint()
       ..filterQuality = FilterQuality.none
       ..isAntiAlias = false;
     final srcRect = Rect.fromLTWH(0, 0, pixelSize.toDouble(), pixelSize.toDouble());
     final dstRect = Rect.fromLTWH(0, 0, size.x, size.y);
-    canvas.drawImageRect(image, srcRect, dstRect, paint);
+    canvas.drawImageRect(image!, srcRect, dstRect, paint);
   }
 }

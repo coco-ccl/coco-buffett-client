@@ -20,7 +20,7 @@ class TopSprites {
     'vest_gold': {'name': '금색 조끼', 'price': 800, 'color': Palette.gold},
   };
 
-  static List<List<Color>> getPixels(Direction direction, String topId) {
+  static List<List<Color>> getPixels(Direction direction, String topId, [int walkFrame = 0]) {
     final t = Palette.t;
     final o = Palette.outline;
     final data = designs[topId] ?? designs['tshirt_white']!;
@@ -35,9 +35,9 @@ class TopSprites {
     } else if (direction == Direction.up) {
       _drawTopBack(pixels, c, o, type, topId);
     } else if (direction == Direction.left) {
-      _drawTopSide(pixels, c, o, type, topId, false);
+      _drawTopSide(pixels, c, o, type, topId, false, walkFrame);
     } else {
-      _drawTopSide(pixels, c, o, type, topId, true);
+      _drawTopSide(pixels, c, o, type, topId, true, walkFrame);
     }
 
     return pixels;
@@ -211,7 +211,7 @@ class TopSprites {
     }
   }
 
-  static void _drawTopSide(List<List<Color>> pixels, Color c, Color o, String type, String topId, bool flip) {
+  static void _drawTopSide(List<List<Color>> pixels, Color c, Color o, String type, String topId, bool flip, int walkFrame) {
     int offset = flip ? 2 : 0;
 
     // 몸통 외곽선
@@ -222,7 +222,7 @@ class TopSprites {
     }
     pixels[21][11 + offset] = o; pixels[21][18 + offset] = o;
 
-    // 팔 외곽선 (길게 row 14-20)
+    // 팔 외곽선 (길게 row 14-20) - 몸에 붙어있음
     int armOuterX = flip ? 20 + offset : 9 + offset;
     for (int y = 14; y <= 20; y++) {
       pixels[y][armOuterX] = o;
@@ -239,14 +239,14 @@ class TopSprites {
       }
     }
 
-    // 팔 채우기 (길게 row 14-20)
+    // 팔 채우기 (길게 row 14-20) - 몸에 붙어있음
     int armX = flip ? 19 + offset : 10 + offset;
     for (int y = 14; y <= 20; y++) {
       pixels[y][armX] = c;
     }
 
     if (type == 'tailcoat' && !flip) {
-      // 연미복 옆모습 - 꼬리
+      // 연미복 옆모습 - 꼬리 (몸통에 고정)
       for (int y = 22; y <= 26; y++) {
         pixels[y][11 + offset] = c;
         pixels[y][10 + offset] = o;
@@ -256,7 +256,7 @@ class TopSprites {
 
     if (topId == 'tshirt_flower') {
       final g = Palette.gold;
-      // 꽃무늬 측면
+      // 꽃무늬 측면 (몸통에 있으므로 걷기 모션 영향 없음)
       pixels[15][13 + offset] = Palette.red;
       pixels[18][15 + offset] = Palette.red;
 

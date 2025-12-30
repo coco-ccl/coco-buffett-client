@@ -22,12 +22,13 @@ class SpriteLayerGenerator {
     required String topId,
     required String bottomId,
     required String shoesId,
+    int walkFrame = 0, // 0: idle, 1: walk1, 2: walk2
   }) async {
     final facePixels = FaceSprites.getPixels(direction, faceId);
     final hairPixels = HairSprites.getPixels(direction, hairId);
-    final topPixels = TopSprites.getPixels(direction, topId);
-    final bottomPixels = BottomSprites.getPixels(direction, bottomId);
-    final shoesPixels = ShoesSprites.getPixels(direction, shoesId);
+    final topPixels = TopSprites.getPixels(direction, topId, walkFrame);
+    final bottomPixels = BottomSprites.getPixels(direction, bottomId, walkFrame);
+    final shoesPixels = ShoesSprites.getPixels(direction, shoesId, walkFrame);
 
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
@@ -66,6 +67,7 @@ class SpriteLayerGenerator {
     required String topId,
     required String bottomId,
     required String shoesId,
+    int walkFrame = 0,
   }) async {
     final images = <Direction, ui.Image>{};
     for (final direction in Direction.values) {
@@ -76,6 +78,7 @@ class SpriteLayerGenerator {
         topId: topId,
         bottomId: bottomId,
         shoesId: shoesId,
+        walkFrame: walkFrame,
       );
     }
     return images;

@@ -18,7 +18,7 @@ class BottomSprites {
     'formal_black': {'name': '정장 바지', 'price': 500, 'color': Palette.pantsBlack},
   };
 
-  static List<List<Color>> getPixels(Direction direction, String bottomId) {
+  static List<List<Color>> getPixels(Direction direction, String bottomId, [int walkFrame = 0]) {
     final t = Palette.t;
     final o = Palette.outline;
     final data = designs[bottomId] ?? designs['pants_black']!;
@@ -31,9 +31,9 @@ class BottomSprites {
     if (direction == Direction.down || direction == Direction.up) {
       _drawBottomFront(pixels, c, o, type);
     } else if (direction == Direction.left) {
-      _drawBottomSide(pixels, c, o, type, false);
+      _drawBottomSide(pixels, c, o, type, false, walkFrame);
     } else {
-      _drawBottomSide(pixels, c, o, type, true);
+      _drawBottomSide(pixels, c, o, type, true, walkFrame);
     }
 
     return pixels;
@@ -91,35 +91,59 @@ class BottomSprites {
     }
   }
 
-  static void _drawBottomSide(List<List<Color>> pixels, Color c, Color o, String type, bool flip) {
+  static void _drawBottomSide(List<List<Color>> pixels, Color c, Color o, String type, bool flip, int walkFrame) {
     int offset = flip ? 2 : 0;
 
-    // 허리 외곽선
-    pixels[22][11 + offset] = o;
-    pixels[22][18 + offset] = o;
+    // 걷기 모션: 앞다리와 뒷다리 각각 그리기
+    int frontLegOffset = 0;
+    int backLegOffset = 0;
 
-    // 다리 외곽선
-    for (int y = 23; y <= 28; y++) {
-      pixels[y][12 + offset] = o;
-      pixels[y][17 + offset] = o;
+    if (walkFrame == 1) {
+      frontLegOffset = flip ? -2 : 2; // 앞다리 앞으로
+      backLegOffset = flip ? 1 : -1;  // 뒷다리 뒤로
+    } else if (walkFrame == 2) {
+      frontLegOffset = flip ? 1 : -1;  // 앞다리 뒤로
+      backLegOffset = flip ? -2 : 2;   // 뒷다리 앞으로
     }
 
-    // 허리 채우기
+    // 허리는 중앙에 고정
+    pixels[22][11 + offset] = o;
+    pixels[22][18 + offset] = o;
     for (int x = 12 + offset; x <= 17 + offset; x++) {
       pixels[22][x] = c;
     }
 
-    // 다리 채우기
+    // 다리 중심 위치 계산 (몸통 중앙)
+    int legCenterX = flip ? 15 + offset : 14 + offset;
+
+    // 뒷다리 (먼저 그려서 뒤에 있게) - 몸통 중앙에 위치
+    _drawSingleLeg(pixels, c, o, type, legCenterX + backLegOffset);
+
+    // 앞다리 (나중에 그려서 앞에 있게) - 몸통 중앙에 위치
+    _drawSingleLeg(pixels, c, o, type, legCenterX + frontLegOffset);
+  }
+
+  static void _drawSingleLeg(List<List<Color>> pixels, Color c, Color o, String type, int centerX) {
+    // 다리 외곽선 (중심을 기준으로 좌우로, 총 6픽셀 너비)
+    int left = centerX - 3;
+    int right = centerX + 2;
+
     for (int y = 23; y <= 28; y++) {
-      for (int x = 13 + offset; x <= 16 + offset; x++) {
+      pixels[y][left] = o;
+      pixels[y][right] = o;
+    }
+
+    // 다리 채우기 (4픽셀)
+    for (int y = 23; y <= 28; y++) {
+      for (int x = left + 1; x <= right - 1; x++) {
         pixels[y][x] = c;
       }
     }
 
-    // 슬랙스/정장 바지 - 다림질 선
+    // 슬랙스/정장 바지 - 다림질 선 (중앙)
     if (type == 'slacks' || type == 'formal') {
       for (int y = 23; y <= 28; y++) {
-        pixels[y][14 + offset] = _darken(c);
+        pixels[y][centerX] = _darken(c);
       }
     }
   }

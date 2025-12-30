@@ -17,7 +17,7 @@ class ShoesSprites {
     'boots_black': {'name': '검정 부츠', 'price': 400, 'color': Palette.shoesBlack},
   };
 
-  static List<List<Color>> getPixels(Direction direction, String shoesId) {
+  static List<List<Color>> getPixels(Direction direction, String shoesId, [int walkFrame = 0]) {
     final t = Palette.t;
     final o = Palette.outline;
     final data = designs[shoesId] ?? designs['shoes_black']!;
@@ -28,93 +28,162 @@ class ShoesSprites {
     String type = shoesId.split('_')[0];
 
     if (direction == Direction.down || direction == Direction.up) {
-      _drawShoesFront(pixels, c, o, type);
+      _drawShoesFront(pixels, c, o, type, walkFrame);
     } else if (direction == Direction.left) {
-      _drawShoesSide(pixels, c, o, type, false);
+      _drawShoesSide(pixels, c, o, type, false, walkFrame);
     } else {
-      _drawShoesSide(pixels, c, o, type, true);
+      _drawShoesSide(pixels, c, o, type, true, walkFrame);
     }
 
     return pixels;
   }
 
-  static void _drawShoesFront(List<List<Color>> pixels, Color c, Color o, String type) {
+  static void _drawShoesFront(List<List<Color>> pixels, Color c, Color o, String type, int walkFrame) {
+    // walkFrame 0: idle, 1: 왼발 들기, 2: 오른발 들기
+    int leftYOffset = 0;
+    int rightYOffset = 0;
+    if (walkFrame == 1) {
+      leftYOffset = -1; // 왼발 1픽셀 위로
+    } else if (walkFrame == 2) {
+      rightYOffset = -1; // 오른발 1픽셀 위로
+    }
+
     // 왼쪽 신발 외곽선
-    pixels[29][9] = o;
-    pixels[29][15] = o;
-    for (int x = 9; x <= 15; x++) pixels[31][x] = o;
-    pixels[30][8] = o;
+    pixels[29 + leftYOffset][9] = o;
+    pixels[29 + leftYOffset][15] = o;
+    for (int x = 9; x <= 15; x++) pixels[31 + leftYOffset][x] = o;
+    pixels[30 + leftYOffset][8] = o;
 
     // 오른쪽 신발 외곽선
-    pixels[29][16] = o;
-    pixels[29][22] = o;
-    for (int x = 16; x <= 22; x++) pixels[31][x] = o;
-    pixels[30][23] = o;
+    pixels[29 + rightYOffset][16] = o;
+    pixels[29 + rightYOffset][22] = o;
+    for (int x = 16; x <= 22; x++) pixels[31 + rightYOffset][x] = o;
+    pixels[30 + rightYOffset][23] = o;
 
     // 왼쪽 신발 채우기
     for (int x = 10; x <= 14; x++) {
-      pixels[29][x] = c;
-      pixels[30][x] = c;
+      pixels[29 + leftYOffset][x] = c;
+      pixels[30 + leftYOffset][x] = c;
     }
-    pixels[30][9] = c;
-    pixels[30][15] = c;
+    pixels[30 + leftYOffset][9] = c;
+    pixels[30 + leftYOffset][15] = c;
 
     // 오른쪽 신발 채우기
     for (int x = 17; x <= 21; x++) {
-      pixels[29][x] = c;
-      pixels[30][x] = c;
+      pixels[29 + rightYOffset][x] = c;
+      pixels[30 + rightYOffset][x] = c;
     }
-    pixels[30][16] = c;
-    pixels[30][22] = c;
+    pixels[30 + rightYOffset][16] = c;
+    pixels[30 + rightYOffset][22] = c;
 
     // 타입별 디테일
     if (type == 'sneakers') {
       // 운동화 - 흰색 밑창
-      for (int x = 9; x <= 15; x++) pixels[30][x] = Palette.white;
-      for (int x = 16; x <= 22; x++) pixels[30][x] = Palette.white;
+      for (int x = 9; x <= 15; x++) pixels[30 + leftYOffset][x] = Palette.white;
+      for (int x = 16; x <= 22; x++) pixels[30 + rightYOffset][x] = Palette.white;
     } else if (type == 'oxford' || type == 'loafer') {
       // 구두 광택
-      pixels[29][11] = _lighten(c);
-      pixels[29][18] = _lighten(c);
+      pixels[29 + leftYOffset][11] = _lighten(c);
+      pixels[29 + rightYOffset][18] = _lighten(c);
     } else if (type == 'boots') {
       // 부츠 - 높이 추가
-      for (int x = 11; x <= 14; x++) pixels[28][x] = c;
-      for (int x = 17; x <= 20; x++) pixels[28][x] = c;
-      pixels[28][10] = o; pixels[28][15] = o;
-      pixels[28][16] = o; pixels[28][21] = o;
+      for (int x = 11; x <= 14; x++) pixels[28 + leftYOffset][x] = c;
+      for (int x = 17; x <= 20; x++) pixels[28 + rightYOffset][x] = c;
+      pixels[28 + leftYOffset][10] = o; pixels[28 + leftYOffset][15] = o;
+      pixels[28 + rightYOffset][16] = o; pixels[28 + rightYOffset][21] = o;
     }
   }
 
-  static void _drawShoesSide(List<List<Color>> pixels, Color c, Color o, String type, bool flip) {
+  static void _drawShoesSide(List<List<Color>> pixels, Color c, Color o, String type, bool flip, int walkFrame) {
     int offset = flip ? 2 : 0;
 
-    // 신발 외곽선
-    pixels[29][11 + offset] = o;
-    pixels[29][19 + offset] = o;
-    for (int x = 11 + offset; x <= 19 + offset; x++) pixels[31][x] = o;
+    // 걷기 모션: 앞다리와 뒷다리 각각 그리기
+    int frontLegOffset = 0;
+    int backLegOffset = 0;
 
-    // 앞코/뒷꿈치 외곽선
-    int toeOuterX = flip ? 20 + offset : 10 + offset;
-    pixels[30][toeOuterX] = o;
-
-    // 신발 채우기
-    for (int x = 12 + offset; x <= 18 + offset; x++) {
-      pixels[29][x] = c;
-      pixels[30][x] = c;
+    if (walkFrame == 1) {
+      frontLegOffset = flip ? -2 : 2; // 앞다리 앞으로
+      backLegOffset = flip ? 1 : -1;  // 뒷다리 뒤로
+    } else if (walkFrame == 2) {
+      frontLegOffset = flip ? 1 : -1;  // 앞다리 뒤로
+      backLegOffset = flip ? -2 : 2;   // 뒷다리 앞으로
     }
-    pixels[30][11 + offset] = c;
-    pixels[30][19 + offset] = c;
 
-    // 앞코
-    int toeX = flip ? 19 + offset : 11 + offset;
-    pixels[30][toeX] = c;
+    // 신발 중심 위치 계산 (바지 다리와 동일)
+    int shoeCenterX = flip ? 15 + offset : 14 + offset;
 
-    if (type == 'sneakers') {
-      for (int x = 11 + offset; x <= 19 + offset; x++) pixels[30][x] = Palette.white;
-      pixels[30][toeX] = Palette.white;
-    } else if (type == 'boots') {
-      for (int x = 13 + offset; x <= 17 + offset; x++) pixels[28][x] = c;
-      pixels[28][12 + offset] = o; pixels[28][18 + offset] = o;
+    // 뒷다리 신발 (먼저 그려서 뒤에 있게) - 바지 다리와 중심 맞춤
+    _drawSingleShoe(pixels, c, o, type, shoeCenterX + backLegOffset, flip);
+
+    // 앞다리 신발 (나중에 그려서 앞에 있게) - 바지 다리와 중심 맞춤
+    _drawSingleShoe(pixels, c, o, type, shoeCenterX + frontLegOffset, flip);
+  }
+
+  static void _drawSingleShoe(List<List<Color>> pixels, Color c, Color o, String type, int centerX, bool flip) {
+    // 신발 측면 뷰 - 진행 방향에 따라 앞코 위치가 달라짐
+    // flip = false (왼쪽 방향): 왼쪽이 앞코, 오른쪽이 뒤꿈치
+    // flip = true (오른쪽 방향): 오른쪽이 앞코, 왼쪽이 뒤꿈치
+
+    if (flip) {
+      // 오른쪽 방향: 오른쪽이 앞코
+      int heel = centerX - 3;    // 뒤꿈치 (왼쪽)
+      int toe = centerX + 3;     // 앞코 (오른쪽)
+
+      // 신발 윗부분 외곽선 (row 29)
+      pixels[29][heel] = o;
+      pixels[29][toe] = o;
+
+      // 신발 윗부분 채우기 (row 29)
+      for (int x = heel + 1; x <= toe - 1; x++) pixels[29][x] = c;
+
+      // 신발 중간 (row 30)
+      pixels[30][heel] = o;
+      for (int x = heel + 1; x <= toe; x++) pixels[30][x] = c;
+      pixels[30][toe + 1] = o; // 앞코 돌출
+
+      // 밑창 (row 31)
+      for (int x = heel; x <= toe + 1; x++) pixels[31][x] = o;
+
+      // 타입별 디테일
+      if (type == 'sneakers') {
+        for (int x = heel + 1; x <= toe; x++) pixels[30][x] = Palette.white;
+      } else if (type == 'oxford' || type == 'loafer') {
+        pixels[29][toe - 1] = _lighten(c);
+      } else if (type == 'boots') {
+        for (int x = heel + 1; x <= toe - 1; x++) pixels[28][x] = c;
+        pixels[28][heel] = o;
+        pixels[28][toe] = o;
+      }
+    } else {
+      // 왼쪽 방향: 왼쪽이 앞코
+      int toe = centerX - 3;     // 앞코 (왼쪽)
+      int heel = centerX + 3;    // 뒤꿈치 (오른쪽)
+
+      // 신발 윗부분 외곽선 (row 29)
+      pixels[29][toe] = o;
+      pixels[29][heel] = o;
+
+      // 신발 윗부분 채우기 (row 29)
+      for (int x = toe + 1; x <= heel - 1; x++) pixels[29][x] = c;
+
+      // 신발 중간 (row 30)
+      pixels[30][toe - 1] = o; // 앞코 돌출
+      for (int x = toe; x <= heel - 1; x++) pixels[30][x] = c;
+      pixels[30][heel] = o;
+
+      // 밑창 (row 31)
+      for (int x = toe - 1; x <= heel; x++) pixels[31][x] = o;
+
+      // 타입별 디테일
+      if (type == 'sneakers') {
+        for (int x = toe; x <= heel - 1; x++) pixels[30][x] = Palette.white;
+      } else if (type == 'oxford' || type == 'loafer') {
+        pixels[29][toe + 1] = _lighten(c);
+      } else if (type == 'boots') {
+        for (int x = toe + 1; x <= heel - 1; x++) pixels[28][x] = c;
+        pixels[28][toe] = o;
+        pixels[28][heel] = o;
+      }
     }
   }
 
