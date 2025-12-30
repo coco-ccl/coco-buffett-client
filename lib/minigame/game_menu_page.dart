@@ -80,7 +80,16 @@ class _GameMenuPageState extends State<GameMenuPage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 60),
+              const SizedBox(height: 12),
+              const Text(
+                '주식 할 돈이 없으신가요? 미니 게임을 통해 벌어보세요!',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white70,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 40),
 
               // 게임 버튼들
               _buildGameButton(
@@ -99,6 +108,15 @@ class _GameMenuPageState extends State<GameMenuPage> {
                 icon: Icons.catching_pokemon,
                 color: const Color(0xFF66BB6A),
                 onPressed: () => context.push('/catch-coco'),
+              ),
+              const SizedBox(height: 24),
+              _buildGameButton(
+                context,
+                title: '똥피하기',
+                subtitle: '30초 동안 똥을 피해 살아남으세요!',
+                icon: Icons.directions_run,
+                color: const Color(0xFF8D6E63),
+                onPressed: () => context.push('/dodge-poop'),
               ),
             ],
           ),
