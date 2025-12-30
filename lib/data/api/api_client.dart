@@ -12,6 +12,8 @@ import '../models/equip_item_request.dart';
 import '../models/signup_request.dart';
 import '../models/login_request.dart';
 import '../models/login_response.dart';
+import '../models/add_money_request.dart';
+import '../models/add_money_response.dart';
 
 /// API Client - 서버 통신 담당
 class ApiClient {
@@ -250,6 +252,25 @@ class ApiClient {
       return ApiResponse.fromJson(
         response.data,
         (json) => LoginResponse.fromJson(json as Map<String, dynamic>),
+      );
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  /// 돈 추가
+  /// POST /cocobuffett/v1/members/money
+  Future<ApiResponse<AddMoneyResponse>> addMoney(int amount) async {
+    try {
+      final request = AddMoneyRequest(amount: amount);
+      final response = await _dio.post(
+        '/cocobuffett/v1/members/money',
+        data: request.toJson(),
+      );
+
+      return ApiResponse.fromJson(
+        response.data,
+        (json) => AddMoneyResponse.fromJson(json as Map<String, dynamic>),
       );
     } on DioException catch (e) {
       throw _handleDioError(e);

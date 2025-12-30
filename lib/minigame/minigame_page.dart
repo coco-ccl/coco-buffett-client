@@ -13,7 +13,7 @@ class MinigamePage extends StatefulWidget {
 
 class _MinigamePageState extends State<MinigamePage>
     with SingleTickerProviderStateMixin {
-  static const int gameDuration = 30;
+  static const int gameDuration = 10;
 
   int _tapCount = 0;
   int _remainingSeconds = gameDuration;
@@ -62,20 +62,22 @@ class _MinigamePageState extends State<MinigamePage>
     });
   }
 
-  void _endGame() {
+  Future<void> _endGame() async {
     _timer?.cancel();
     setState(() {
       _isPlaying = false;
       _isGameOver = true;
     });
 
-    // 자산 추가
+    // 서버 API 호출하여 자산 추가
     final assetRepository = context.read<AssetRepository>();
-    final reward = _tapCount * 100; // 터치당 100원
-    assetRepository.addCash(reward);
+    final reward = _tapCount * 10000; // 터치당 100원
+    await assetRepository.addCashFromServer(reward);
 
     // 결과 다이얼로그 표시
-    _showResultDialog(reward);
+    if (mounted) {
+      _showResultDialog(reward);
+    }
   }
 
   void _onTap() {
