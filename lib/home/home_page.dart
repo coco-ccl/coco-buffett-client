@@ -62,7 +62,7 @@ class _HomePageState extends State<_HomePageContent> {
         },
         onEnterArcade: () {
           if (mounted) {
-            context.push('/minigame');
+            context.push('/game-menu');
           }
         },
       );
