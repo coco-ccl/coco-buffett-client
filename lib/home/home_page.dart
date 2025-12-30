@@ -52,6 +52,11 @@ class _HomePageState extends State<_HomePageContent> {
             context.push('/shop');
           }
         },
+        onEnterStock: () {
+          if (mounted) {
+            context.push('/stock');
+          }
+        },
       );
       _isGameInitialized = true;
     }
