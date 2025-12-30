@@ -1,52 +1,42 @@
 import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import '../coco_game.dart';
+import '../utils/sky_colors.dart';
 
-class SkyBackground extends PositionComponent with HasGameReference {
-  SkyBackground() {
+class SkyBackground extends PositionComponent with HasGameReference<CocoGame> {
+  final double mapWidth;
+  final double mapHeight;
+
+  SkyBackground({required this.mapWidth, required this.mapHeight}) {
     priority = -100;
   }
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    size = game.size;
+    size = Vector2(mapWidth, mapHeight);
+    position = Vector2.zero();
   }
 
   @override
-  void onGameResize(Vector2 size) {
-    super.onGameResize(size);
-    this.size = size;
+  void update(double dt) {
+    super.update(dt);
+    // 배경은 항상 맵 전체를 덮도록 위치 고정
+    position = Vector2.zero();
+    size = Vector2(mapWidth, mapHeight);
   }
 
   @override
   void render(Canvas canvas) {
-    final now = DateTime.now();
-    final hour = now.hour + (now.minute / 60.0);
-    
     final fullRect = Rect.fromLTWH(0, 0, size.x, size.y);
-    Color topColor;
-    Color bottomColor;
-
-    if (hour >= 5 && hour < 7) { // 새벽
-      topColor = const Color(0xFF1A0F21);
-      bottomColor = const Color(0xFFE57373);
-    } else if (hour >= 7 && hour < 17) { // 낮
-      topColor = const Color(0xFF4FC3F7);
-      bottomColor = const Color(0xFF81D4FA);
-    } else if (hour >= 17 && hour < 19) { // 노을
-      topColor = const Color(0xFF2D1B36);
-      bottomColor = const Color(0xFFF4511E);
-    } else { // 밤
-      topColor = const Color(0xFF020205);
-      bottomColor = const Color(0xFF0D0D25);
-    }
+    final colors = SkyColors.getSkyColors();
 
     final skyPaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [topColor, bottomColor],
+        colors: [colors.top, colors.bottom],
       ).createShader(fullRect);
     canvas.drawRect(fullRect, skyPaint);
   }

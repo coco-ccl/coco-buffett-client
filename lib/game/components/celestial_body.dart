@@ -2,8 +2,9 @@ import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import '../coco_game.dart';
 
-class CelestialBody extends PositionComponent with HasGameReference {
+class CelestialBody extends PositionComponent with HasGameReference<CocoGame> {
   CelestialBody() {
     priority = -90;
   }
@@ -11,23 +12,25 @@ class CelestialBody extends PositionComponent with HasGameReference {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    size = game.size;
+    size = game.camera.viewport.size;
   }
 
   @override
-  void onGameResize(Vector2 size) {
-    super.onGameResize(size);
-    this.size = size;
+  void update(double dt) {
+    super.update(dt);
+    // 카메라 위치를 따라가도록 설정
+    position = game.camera.viewfinder.position - game.camera.viewport.size / 2;
+    size = game.camera.viewport.size;
   }
 
   @override
   void render(Canvas canvas) {
     final now = DateTime.now();
     final hour = now.hour + (now.minute / 60.0);
-    
+
     // 6시부터 18시까지는 해, 그 외에는 달
     final bool isDay = hour >= 6 && hour < 18;
-    
+
     // 궤적 계산 (6시~18시: 0~1, 18시~6시: 0~1)
     double progress;
     if (isDay) {

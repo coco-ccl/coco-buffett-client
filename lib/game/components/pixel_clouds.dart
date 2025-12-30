@@ -2,16 +2,25 @@ import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import '../coco_game.dart';
+import '../utils/sky_colors.dart';
 
-class PixelClouds extends Component with HasGameReference {
+class PixelClouds extends PositionComponent with HasGameReference<CocoGame> {
   final List<_Cloud> _clouds = [];
   final math.Random _random = math.Random();
 
+  PixelClouds() {
+    priority = -80;
+  }
+
   @override
   Future<void> onLoad() async {
+    await super.onLoad();
+    size = game.camera.viewport.size;
+
     for (int i = 0; i < 8; i++) {
       _clouds.add(_Cloud(
-        x: _random.nextDouble() * game.size.x,
+        x: _random.nextDouble() * size.x,
         y: _random.nextDouble() * 200 + 50,
         speed: _random.nextDouble() * 15 + 5,
         scale: _random.nextDouble() * 0.6 + 0.7,
@@ -21,34 +30,25 @@ class PixelClouds extends Component with HasGameReference {
 
   @override
   void update(double dt) {
+    super.update(dt);
+
+    // 카메라 위치를 따라가도록 설정
+    position = game.camera.viewfinder.position - game.camera.viewport.size / 2;
+    size = game.camera.viewport.size;
+
     for (var cloud in _clouds) {
       cloud.x += cloud.speed * dt;
-      // 화면 너비를 기준으로 순환 (Viewport 기준)
-      if (cloud.x > game.size.x + 100) cloud.x = -200;
+      // viewport 너비를 기준으로 순환
+      if (cloud.x > size.x + 100) cloud.x = -200;
     }
   }
 
   @override
   void render(Canvas canvas) {
-    final now = DateTime.now();
-    final hour = now.hour + (now.minute / 60.0);
-    
-    Color mainColor;
-    Color shadowColor;
-
-    if (hour >= 7 && hour < 17) { // 낮
-      mainColor = Colors.white.withValues(alpha: 0.7);
-      shadowColor = const Color(0xFFB0BEC5).withValues(alpha: 0.5);
-    } else if (hour >= 17 && hour < 19) { // 노을
-      mainColor = Colors.orangeAccent.withValues(alpha: 0.7);
-      shadowColor = Colors.deepOrange.withValues(alpha: 0.5);
-    } else { // 밤
-      mainColor = const Color(0xFF1A1A2E).withValues(alpha: 0.3);
-      shadowColor = Colors.black.withValues(alpha: 0.2);
-    }
+    final colors = SkyColors.getCloudColors();
 
     for (var cloud in _clouds) {
-      _drawStylizedCloud(canvas, cloud.x, cloud.y, cloud.scale, mainColor, shadowColor);
+      _drawStylizedCloud(canvas, cloud.x, cloud.y, cloud.scale, colors.main, colors.shadow);
     }
   }
 

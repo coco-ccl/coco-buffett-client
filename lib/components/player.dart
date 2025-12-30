@@ -145,9 +145,9 @@ class Player extends PositionComponent
       position.y = nextYPos.y;
     }
 
-    // 화면 경계 제한
-    position.x = position.x.clamp(0, game.size.x - size.x);
-    position.y = position.y.clamp(0, game.size.y - size.y);
+    // 맵 경계 제한 (단순하게 맵 안에만 있도록)
+    position.x = position.x.clamp(0, game.cityMap.size.x - size.x);
+    position.y = position.y.clamp(0, game.cityMap.size.y - size.y);
   }
 
   @override
