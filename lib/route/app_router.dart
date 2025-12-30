@@ -4,6 +4,7 @@ import 'package:cocobuffett/auth/login_page.dart';
 import 'package:cocobuffett/home/home_page.dart';
 import 'package:cocobuffett/inventory/inventory_page.dart';
 import 'package:cocobuffett/minigame/minigame_page.dart';
+import 'package:cocobuffett/minigame/catch_coco_page.dart';
 import 'package:cocobuffett/shop/shop_page.dart';
 import 'package:cocobuffett/stock/stock_page.dart';
 import 'package:flutter/material.dart';
@@ -56,6 +57,11 @@ class AppRouter {
         path: '/minigame',
         name: 'minigame',
         builder: (context, state) => const MinigamePage(),
+      ),
+      GoRoute(
+        path: '/catch-coco',
+        name: 'catch-coco',
+        builder: (context, state) => const CatchCocoPage(),
       ),
     ],
   );

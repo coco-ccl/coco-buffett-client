@@ -211,6 +211,17 @@ class _HomePageState extends State<_HomePageContent> {
               child: const Icon(Icons.gamepad),
             ),
           ),
+          // 코코잡기 게임 버튼
+          Positioned(
+            top: 370,
+            left: 20,
+            child: FloatingActionButton(
+              heroTag: 'catch_coco_button',
+              onPressed: () => context.push('/catch-coco'),
+              backgroundColor: const Color(0xFF66BB6A),
+              child: const Icon(Icons.catching_pokemon),
+            ),
+          ),
           // 주식창 버튼
           Positioned(
             top: 20,

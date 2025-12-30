@@ -242,11 +242,17 @@ class _MinigamePageState extends State<MinigamePage>
               ),
             ),
 
+            // 로고
+            Image.asset(
+              'assets/images/coco_logo.png',
+              width: 200,
+              height: 140,
+            ),
             // 보상 안내
             Container(
               padding: const EdgeInsets.all(16),
               child: Text(
-                '터치 1회 = 100원',
+                '터치 1회 = 1,000원',
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey[600],
