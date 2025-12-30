@@ -1,23 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'auth_bloc/auth_bloc.dart';
 import '../data/repositories/auth_repository.dart';
-import '../data/repositories/item_repository.dart';
-import '../game/player_bloc/player_bloc.dart';
+import '../data/repositories/member_repository.dart';
 
-class LoginPage extends StatefulWidget {
+/// LoginPage Wrapper - BLoC 제공
+class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => AuthBloc(
+        authRepository: context.read<AuthRepository>(),
+        memberRepository: context.read<MemberRepository>(),
+      ),
+      child: const _LoginPageContent(),
+    );
+  }
 }
 
-class _LoginPageState extends State<LoginPage> {
+/// LoginPage 실제 내용
+class _LoginPageContent extends StatefulWidget {
+  const _LoginPageContent();
+
+  @override
+  State<_LoginPageContent> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<_LoginPageContent> {
   final _formKey = GlobalKey<FormState>();
   final _memberIdController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  bool _isLoading = false;
   bool _obscurePassword = true;
 
   @override
@@ -27,127 +43,75 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
+  void _handleLogin() {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final authRepository = context.read<AuthRepository>();
-      final itemRepository = context.read<ItemRepository>();
-      final playerBloc = context.read<PlayerBloc>();
-
-      final accessToken = await authRepository.login(
-        memberId: _memberIdController.text.trim(),
-        password: _passwordController.text,
-      );
-
-      // 로그인 성공 후 착용 아이템 로드 (완료를 기다림)
-      print('[LoginPage] 착용 아이템 로드 시작');
-      final equippedItems = await itemRepository.getEquippedItems();
-      print('[LoginPage] 착용 아이템 ${equippedItems.length}개 로드 완료');
-
-      // 착용 아이템을 타입별로 매핑
-      String faceId = 'default';
-      String hairId = 'short_brown';
-      String topId = 'tshirt_white';
-      String bottomId = 'pants_black';
-      String shoesId = 'shoes_black';
-
-      for (final item in equippedItems) {
-        switch (item.type) {
-          case 'face':
-            faceId = item.itemId;
-            break;
-          case 'hair':
-            hairId = item.itemId;
-            break;
-          case 'top':
-            topId = item.itemId;
-            break;
-          case 'bottom':
-            bottomId = item.itemId;
-            break;
-          case 'shoes':
-            shoesId = item.itemId;
-            break;
-        }
-      }
-
-      // PlayerBloc에 모든 아이템을 한 번에 적용
-      playerBloc.add(PlayerEvent.setAllItems(
-        faceId: faceId,
-        hairId: hairId,
-        topId: topId,
-        bottomId: bottomId,
-        shoesId: shoesId,
-      ));
-
-      // 짧은 딜레이 (상태 업데이트 완료 대기)
-      await Future.delayed(const Duration(milliseconds: 100));
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.white, size: 20),
-                SizedBox(width: 8),
-                Text(
-                  '로그인 성공!',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            duration: Duration(seconds: 1),
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Color(0xFF4A90E2),
+// AuthBloc에 로그인 이벤트 전송
+    context.read<AuthBloc>().add(
+          AuthEvent.loginRequested(
+            memberId: _memberIdController.text.trim(),
+            password: _passwordController.text,
           ),
         );
-
-        // 로그인 성공 시 홈 화면으로 이동
-        context.go('/');
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error, color: Colors.white, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    '로그인 실패: ${e.toString()}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-            duration: const Duration(seconds: 3),
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5DC), // 베이지 배경
-      appBar: AppBar(
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        state.when(
+          initial: () {},
+          loading: () {},
+          success: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.white, size: 20),
+                    SizedBox(width: 8),
+                    Text(
+                      '로그인 성공!',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                duration: Duration(seconds: 1),
+                behavior: SnackBarBehavior.floating,
+                backgroundColor: Color(0xFF4A90E2),
+              ),
+            );
+
+            // 로그인 성공 시 홈 화면으로 이동
+            context.go('/');
+          },
+          failure: (message) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.error, color: Colors.white, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '로그인 실패: $message',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                duration: const Duration(seconds: 3),
+                behavior: SnackBarBehavior.floating,
+                backgroundColor: Colors.red,
+              ),
+            );
+          },
+        );
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF5F5DC), // 베이지 배경
+        appBar: AppBar(
         title: const Text(
           '로그인',
           style: TextStyle(
@@ -241,36 +205,44 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 40),
 
                 // 로그인 버튼
-                SizedBox(
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _handleLogin,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4A90E2),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.zero,
-                        side: const BorderSide(color: Colors.black, width: 3),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                        : const Text(
-                            '로그인',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                BlocBuilder<AuthBloc, AuthState>(
+                  builder: (context, state) {
+                    final isLoading = state.maybeWhen(
+                      loading: () => true,
+                      orElse: () => false,
+                    );
+                    return SizedBox(
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: isLoading ? null : _handleLogin,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF4A90E2),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero,
+                            side: const BorderSide(color: Colors.black, width: 3),
                           ),
-                  ),
+                          elevation: 0,
+                        ),
+                        child: isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              )
+                            : const Text(
+                                '로그인',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                      ),
+                    );
+                  },
                 ),
 
                 const SizedBox(height: 16),
@@ -290,6 +262,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

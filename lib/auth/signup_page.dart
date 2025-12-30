@@ -78,7 +78,7 @@ class _SignupPageState extends State<SignupPage> {
           ),
         );
 
-        // 3. 홈 화면으로 이동
+        // 3. 홈 화면으로 이동 (HomePage에서 Repository 초기화)
         context.go('/');
       }
     } catch (e) {

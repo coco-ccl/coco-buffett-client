@@ -6,6 +6,7 @@ part 'trade_stock_request.g.dart';
 @JsonSerializable()
 class TradeStockRequest {
   final String ticker; // 거래할 주식 티커
+  @JsonKey(name: 'trade_type')
   final String tradeType; // 거래 유형 (BUY: 매수, SELL: 매도)
   final int quantity; // 거래 수량 (주)
   final int price; // 거래 단가 (원)

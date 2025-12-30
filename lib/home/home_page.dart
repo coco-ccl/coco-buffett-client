@@ -4,17 +4,40 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../game/coco_game.dart';
 import '../game/player_bloc/player_bloc.dart';
+import '../auth/auth_bloc/auth_bloc.dart';
 import '../data/repositories/auth_repository.dart';
+import '../data/repositories/member_repository.dart';
+import '../data/repositories/asset_repository.dart';
+import '../data/repositories/item_repository.dart';
+import '../data/repositories/stock_repository.dart';
 
-class HomePage extends StatefulWidget {
+/// HomePage Wrapper - AuthBloc 제공
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => AuthBloc(
+        authRepository: context.read<AuthRepository>(),
+        memberRepository: context.read<MemberRepository>(),
+      ),
+      child: const _HomePageContent(),
+    );
+  }
 }
 
-class _HomePageState extends State<HomePage> {
+/// HomePage 실제 내용
+class _HomePageContent extends StatefulWidget {
+  const _HomePageContent();
+
+  @override
+  State<_HomePageContent> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<_HomePageContent> {
   late final CocoGame game;
+  bool _isGameInitialized = false;
 
   @override
   void didChangeDependencies() {
@@ -34,12 +57,75 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  bool _isGameInitialized = false;
+  Future<void> _initializeRepositories() async {
+    final memberRepo = context.read<MemberRepository>();
+    final assetRepo = context.read<AssetRepository>();
+    final itemRepo = context.read<ItemRepository>();
+    final stockRepo = context.read<StockRepository>();
+
+    // MemberRepository에서 memberId 가져오기
+    final memberId = memberRepo.currentMemberId;
+    if (memberId == null) {
+      throw Exception('로그인 정보가 없습니다. memberId가 null입니다.');
+    }
+
+    // 모든 Repository 초기화 (한 번만)
+    await Future.wait([
+      assetRepo.initialize(memberId: memberId),
+      itemRepo.initialize(),
+      stockRepo.initialize(),
+    ]);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final playerBloc = context.read<PlayerBloc>();
+    return FutureBuilder<void>(
+      future: _initializeRepositories(),
+      builder: (context, snapshot) {
+        // 로딩 중
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('데이터를 불러오는 중...'),
+                ],
+              ),
+            ),
+          );
+        }
 
+        // 에러 발생
+        if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error, color: Colors.red, size: 64),
+                  const SizedBox(height: 16),
+                  Text('데이터 로드 실패: ${snapshot.error}'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => setState(() {}),
+                    child: const Text('다시 시도'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // 초기화 완료 - 홈 화면 표시
+        return _buildHomePage();
+      },
+    );
+  }
+
+  Widget _buildHomePage() {
     return Scaffold(
       appBar: AppBar(
         title: const Text('COCO Buffett'),
@@ -247,9 +333,8 @@ class _HomePageState extends State<HomePage> {
                       ),
                       child: TextButton(
                         onPressed: () {
-                          // 로그아웃 처리
-                          final authRepository = context.read<AuthRepository>();
-                          authRepository.logout();
+                          // 로그아웃 처리 - AuthBloc에 이벤트 전송
+                          context.read<AuthBloc>().add(const AuthEvent.logoutRequested());
 
                           // 다이얼로그 닫기
                           Navigator.of(dialogContext).pop();

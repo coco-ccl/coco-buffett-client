@@ -9,7 +9,7 @@ part of 'trade_stock_request.dart';
 TradeStockRequest _$TradeStockRequestFromJson(Map<String, dynamic> json) =>
     TradeStockRequest(
       ticker: json['ticker'] as String,
-      tradeType: json['tradeType'] as String,
+      tradeType: json['trade_type'] as String,
       quantity: (json['quantity'] as num).toInt(),
       price: (json['price'] as num).toInt(),
     );
@@ -17,7 +17,7 @@ TradeStockRequest _$TradeStockRequestFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$TradeStockRequestToJson(TradeStockRequest instance) =>
     <String, dynamic>{
       'ticker': instance.ticker,
-      'tradeType': instance.tradeType,
+      'trade_type': instance.tradeType,
       'quantity': instance.quantity,
       'price': instance.price,
     };

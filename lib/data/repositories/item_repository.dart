@@ -104,7 +104,7 @@ class ItemRepository {
     throw Exception('Failed to load equipped items');
   }
 
-  /// 아이템 구매 (Public API)
+/// 아이템 구매 (Public API)
   Future<int> purchaseItem(String itemId) async {
     print('[ItemRepository] 아이템 구매 시작: itemId=$itemId');
 
@@ -126,7 +126,7 @@ class ItemRepository {
     throw Exception(response.message);
   }
 
-  /// 아이템 착용
+/// 아이템 착용
   Future<void> equipItem(String itemId) async {
     print('[ItemRepository] 아이템 착용 시작: itemId=$itemId');
 

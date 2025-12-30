@@ -11,7 +11,7 @@ TradableStockResponse _$TradableStockResponseFromJson(
 ) => TradableStockResponse(
   name: json['name'] as String,
   ticker: json['ticker'] as String,
-  currentPrice: (json['currentPrice'] as num).toInt(),
+  currentPrice: (json['current_price'] as num).toInt(),
 );
 
 Map<String, dynamic> _$TradableStockResponseToJson(
@@ -19,5 +19,5 @@ Map<String, dynamic> _$TradableStockResponseToJson(
 ) => <String, dynamic>{
   'name': instance.name,
   'ticker': instance.ticker,
-  'currentPrice': instance.currentPrice,
+  'current_price': instance.currentPrice,
 };

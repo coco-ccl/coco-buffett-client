@@ -53,9 +53,9 @@ class AuthRepository {
     print('[AuthRepository] 로그인 시작: memberId=$memberId');
 
     if (_useMockData) {
-      // Mock 모드: 딜레이 후 mock 토큰 반환
+      // Mock 모드: 토큰만 반환
       await Future.delayed(const Duration(milliseconds: 1000));
-      print('[AuthRepository] 로그인 성공 (Mock): token=mock_access_token_123');
+      print('[AuthRepository] 로그인 성공 (Mock)');
       return 'mock_access_token_123';
     }
 
@@ -77,7 +77,7 @@ class AuthRepository {
     final tokenPreview = accessToken.length > 20
         ? '${accessToken.substring(0, 20)}...'
         : accessToken;
-    print('[AuthRepository] 로그인 성공: token=$tokenPreview');
+    print('[AuthRepository] 로그인 완료: token=$tokenPreview');
     return accessToken;
   }
 

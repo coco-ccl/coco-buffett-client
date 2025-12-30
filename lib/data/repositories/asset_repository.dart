@@ -11,6 +11,7 @@ class AssetRepository {
   // Private 캐시 변수
   int _currentCash = 10000000;
   List<Stock> _myStocks = [];
+  String? _lastMemberId; // 마지막으로 조회한 memberId (refresh용)
 
   // StreamController
   final _cashController = StreamController<int>.broadcast();
@@ -31,7 +32,7 @@ class AssetRepository {
         _useMockData = useMockData;
 
   /// 회원 주식 정보 조회 (캐시 업데이트 포함)
-  Future<AssetData> getMemberStocks(int memberId) async {
+  Future<AssetData> getMemberStocks(String memberId) async {
     AssetData data;
 
     if (_useMockData) {
@@ -98,6 +99,7 @@ class AssetRepository {
                 name: dto.name,
                 ticker: dto.ticker,
                 quantity: dto.quantity,
+                avgPrice: dto.avgPrice ?? dto.currentPrice, // avgPrice가 없으면 currentPrice 사용
               ))
           .toList(),
       totalSpent: 0, // TODO: 서버에서 제공하는 경우 추가
@@ -106,9 +108,18 @@ class AssetRepository {
   }
 
   /// 초기화 (서버에서 데이터 로드 후 캐시 설정)
-  Future<void> initialize() async {
+  Future<void> initialize({required String memberId}) async {
+    _lastMemberId = memberId;
     // getMemberStocks가 캐시 업데이트 및 Stream emit을 수행함
-    await getMemberStocks(1); // memberId는 실제로는 로그인 정보에서
+    await getMemberStocks(memberId);
+  }
+
+  /// 자산 정보 재조회 (주식 거래 후 호출)
+  Future<void> refresh() async {
+    if (_lastMemberId == null) {
+      throw Exception('AssetRepository not initialized');
+    }
+    await getMemberStocks(_lastMemberId!);
   }
 
   /// 주식 매수
