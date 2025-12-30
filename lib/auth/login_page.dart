@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'auth_bloc/auth_bloc.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/repositories/member_repository.dart';
+import '../game/player_bloc/player_bloc.dart';
 
 /// LoginPage Wrapper - BLoC 제공
 class LoginPage extends StatelessWidget {
@@ -65,6 +66,9 @@ class _LoginPageState extends State<_LoginPageContent> {
           initial: () {},
           loading: () {},
           success: () {
+            // 착용 아이템 로드하여 캐릭터에 적용
+            context.read<PlayerBloc>().add(const PlayerEvent.loadEquippedItems());
+
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Row(
