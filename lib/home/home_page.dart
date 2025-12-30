@@ -161,20 +161,9 @@ class _HomePageState extends State<_HomePageContent> {
       body: Stack(
         children: [
           GameWidget(game: game),
-          // 상점 버튼
-          Positioned(
-            top: 20,
-            left: 20,
-            child: FloatingActionButton(
-              heroTag: 'shop_button',
-              onPressed: () => context.push('/shop'),
-              backgroundColor: const Color(0xFF4A90E2),
-              child: const Icon(Icons.shopping_bag),
-            ),
-          ),
           // 인벤토리 버튼
           Positioned(
-            top: 90,
+            top: 20,
             left: 20,
             child: FloatingActionButton(
               heroTag: 'inventory_button',
@@ -185,7 +174,7 @@ class _HomePageState extends State<_HomePageContent> {
           ),
           // 자산 버튼
           Positioned(
-            top: 160,
+            top: 90,
             left: 20,
             child: FloatingActionButton(
               heroTag: 'asset_button',
@@ -196,57 +185,13 @@ class _HomePageState extends State<_HomePageContent> {
           ),
           // 로그아웃 버튼
           Positioned(
-            top: 230,
+            top: 160,
             left: 20,
             child: FloatingActionButton(
               heroTag: 'logout_button',
               onPressed: () => _showLogoutDialog(context),
               backgroundColor: const Color(0xFFE74C3C),
               child: const Icon(Icons.logout),
-            ),
-          ),
-          // 미니게임 버튼
-          Positioned(
-            top: 300,
-            left: 20,
-            child: FloatingActionButton(
-              heroTag: 'minigame_button',
-              onPressed: () => context.push('/minigame'),
-              backgroundColor: const Color(0xFFFF6B6B),
-              child: const Icon(Icons.gamepad),
-            ),
-          ),
-          // 코코잡기 게임 버튼
-          Positioned(
-            top: 370,
-            left: 20,
-            child: FloatingActionButton(
-              heroTag: 'catch_coco_button',
-              onPressed: () => context.push('/catch-coco'),
-              backgroundColor: const Color(0xFF66BB6A),
-              child: const Icon(Icons.catching_pokemon),
-            ),
-          ),
-          // 똥피하기 게임 버튼
-          Positioned(
-            top: 440,
-            left: 20,
-            child: FloatingActionButton(
-              heroTag: 'dodge_poop_button',
-              onPressed: () => context.push('/dodge-poop'),
-              backgroundColor: const Color(0xFF8B4513),
-              child: const Icon(Icons.directions_run),
-            ),
-          ),
-          // 주식창 버튼
-          Positioned(
-            top: 20,
-            right: 20,
-            child: FloatingActionButton(
-              heroTag: 'stock_button',
-              onPressed: () => context.push('/stock'),
-              backgroundColor: Colors.green,
-              child: const Icon(Icons.show_chart),
             ),
           ),
           // 방향 컨트롤 버튼

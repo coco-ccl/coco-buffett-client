@@ -22,11 +22,9 @@ class CityMap extends PositionComponent with HasGameReference {
   RoadLayer? _sidewalkLayer;
   RoadLayer? _asphaltLayer;
   late double _groundY;
+  late Vector2 spawnPoint;
 
   static const double buildingScale = 1.5;
-
-  // 캐릭터 스폰 지점 (인도 위)
-  Vector2 get spawnPoint => Vector2(500, _groundY + 10);
 
   @override
   Future<void> onLoad() async {
@@ -71,32 +69,6 @@ class CityMap extends PositionComponent with HasGameReference {
     }
 
     // --- 빌딩군 배치 ---
-    await addBuilding(EmpireBuilding(
-      position: Vector2(currentX, _groundY),
-      width: 70,
-      height: 320,
-      buildingScale: buildingScale,
-      colorSet: EmpireColorPresets.midnightBlue,
-    ));
-
-    await addBuilding(ApartmentBuilding(
-      position: Vector2(currentX, _groundY),
-      width: 60,
-      height: 240,
-      floors: 7,
-      unitsPerFloor: 2,
-      buildingScale: buildingScale,
-      colorSet: ApartmentColorPresets.brickRed,
-    ));
-
-    await addBuilding(HotelBuilding(
-      position: Vector2(currentX, _groundY),
-      width: 90,
-      height: 180,
-      buildingScale: buildingScale,
-      colorSet: HotelColorPresets.boutiquePurple,
-    ));
-
     _departmentStore = DepartmentStore(
       position: Vector2(currentX + 50, _groundY),
       width: 280,
@@ -129,6 +101,10 @@ class CityMap extends PositionComponent with HasGameReference {
       size: _stockExchange!.getDoorSize(),
     ));
 
+    // 플레이어 스폰 위치 설정 - 주식거래소 문 앞
+    final stockExchangeCenterX = _stockExchange!.position.x + _stockExchange!.size.x / 2;
+    spawnPoint = Vector2(stockExchangeCenterX, _groundY + 10);
+
     _arcade = Arcade(
       position: Vector2(currentX + 50, _groundY),
       width: 200,
@@ -143,6 +119,32 @@ class CityMap extends PositionComponent with HasGameReference {
     await add(ArcadeDoor(
       position: _arcade!.getDoorPosition(),
       size: _arcade!.getDoorSize(),
+    ));
+
+    await addBuilding(EmpireBuilding(
+      position: Vector2(currentX, _groundY),
+      width: 70,
+      height: 320,
+      buildingScale: buildingScale,
+      colorSet: EmpireColorPresets.midnightBlue,
+    ));
+
+    await addBuilding(ApartmentBuilding(
+      position: Vector2(currentX, _groundY),
+      width: 60,
+      height: 240,
+      floors: 7,
+      unitsPerFloor: 2,
+      buildingScale: buildingScale,
+      colorSet: ApartmentColorPresets.brickRed,
+    ));
+
+    await addBuilding(HotelBuilding(
+      position: Vector2(currentX, _groundY),
+      width: 90,
+      height: 180,
+      buildingScale: buildingScale,
+      colorSet: HotelColorPresets.boutiquePurple,
     ));
 
     await addBuilding(GangnamTower(
