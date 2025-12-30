@@ -194,6 +194,25 @@ class CityMap extends PositionComponent with HasGameReference {
   }
 
   bool isBlocked(Rect rect) {
+    // 플레이어의 x 중심 좌표
+    final playerCenterX = rect.left + rect.width / 2;
+
+    // 플레이어가 어떤 건물의 문 영역에 있는지 확인
+    bool isInDoorArea = false;
+    for (var b in _buildings) {
+      final centerX = b.position.x + b.size.x / 2;
+      final doorWidth = 100 * buildingScale;
+      final doorLeft = centerX - doorWidth / 2;
+      final doorRight = centerX + doorWidth / 2;
+
+      // 플레이어가 문 영역 내에 있으면
+      if (playerCenterX >= doorLeft && playerCenterX <= doorRight) {
+        isInDoorArea = true;
+        break;
+      }
+    }
+
+    // 건물 바닥 충돌 체크
     for (var b in _buildings) {
       // 건물 바닥만 막고, 중앙 문 영역은 열어둠
       final centerX = b.position.x + b.size.x / 2;
@@ -217,8 +236,16 @@ class CityMap extends PositionComponent with HasGameReference {
       );
       if (rightFloorRect.overlaps(rect)) return true;
     }
-    // 인도 위쪽으로는 이동 불가 (건물 앞까지만)
-    if (rect.top < _groundY - 50) return true;
+
+    // 상단 경계 체크 - 건물 문 영역이냐 아니냐에 따라 다르게 처리
+    if (isInDoorArea) {
+      // 문 영역에 있으면 건물 앞까지 갈 수 있음 (약간 여유 있게)
+      if (rect.top < _groundY - 60) return true;
+    } else {
+      // 문 영역이 아니면 인도만 걸을 수 있음
+      if (rect.top < _groundY - 5) return true;
+    }
+
     // 차도 아래로는 이동 불가
     if (rect.bottom > _groundY + 220) return true;
     return false;
