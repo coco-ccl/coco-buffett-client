@@ -3,6 +3,7 @@ import 'package:cocobuffett/auth/signup_page.dart';
 import 'package:cocobuffett/auth/login_page.dart';
 import 'package:cocobuffett/home/home_page.dart';
 import 'package:cocobuffett/inventory/inventory_page.dart';
+import 'package:cocobuffett/minigame/game_menu_page.dart';
 import 'package:cocobuffett/minigame/minigame_page.dart';
 import 'package:cocobuffett/minigame/catch_coco_page.dart';
 import 'package:cocobuffett/minigame/dodge_poop_page.dart';
@@ -53,6 +54,11 @@ class AppRouter {
         path: '/login',
         name: 'login',
         builder: (context, state) => const LoginPage(),
+      ),
+      GoRoute(
+        path: '/game-menu',
+        name: 'game-menu',
+        builder: (context, state) => const GameMenuPage(),
       ),
       GoRoute(
         path: '/minigame',
