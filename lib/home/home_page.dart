@@ -10,6 +10,7 @@ import '../data/repositories/member_repository.dart';
 import '../data/repositories/asset_repository.dart';
 import '../data/repositories/item_repository.dart';
 import '../data/repositories/stock_repository.dart';
+import '../services/bgm_service.dart';
 
 /// HomePage Wrapper - AuthBloc 제공
 class HomePage extends StatelessWidget {
@@ -38,6 +39,8 @@ class _HomePageContent extends StatefulWidget {
 class _HomePageState extends State<_HomePageContent> {
   late final CocoGame game;
   bool _isGameInitialized = false;
+  bool _isBgmStarted = false;
+  final BgmService _bgmService = BgmService();
 
   @override
   void didChangeDependencies() {
@@ -54,6 +57,19 @@ class _HomePageState extends State<_HomePageContent> {
         },
       );
       _isGameInitialized = true;
+    }
+  }
+
+  @override
+  void dispose() {
+    _bgmService.stop();
+    super.dispose();
+  }
+
+  void _startBgm() {
+    if (!_isBgmStarted) {
+      _isBgmStarted = true;
+      _bgmService.play();
     }
   }
 
@@ -119,7 +135,8 @@ class _HomePageState extends State<_HomePageContent> {
           );
         }
 
-        // 초기화 완료 - 홈 화면 표시
+        // 초기화 완료 - BGM 재생 및 홈 화면 표시
+        _startBgm();
         return _buildHomePage();
       },
     );
@@ -176,6 +193,17 @@ class _HomePageState extends State<_HomePageContent> {
               onPressed: () => _showLogoutDialog(context),
               backgroundColor: const Color(0xFFE74C3C),
               child: const Icon(Icons.logout),
+            ),
+          ),
+          // 미니게임 버튼
+          Positioned(
+            top: 300,
+            left: 20,
+            child: FloatingActionButton(
+              heroTag: 'minigame_button',
+              onPressed: () => context.push('/minigame'),
+              backgroundColor: const Color(0xFFFF6B6B),
+              child: const Icon(Icons.gamepad),
             ),
           ),
           // 주식창 버튼

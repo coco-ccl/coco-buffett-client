@@ -7,6 +7,7 @@ import 'widgets/candlestick_chart.dart';
 import '../widgets/pixel_widgets.dart';
 import '../data/repositories/asset_repository.dart';
 import '../data/repositories/stock_repository.dart';
+import '../services/bgm_service.dart';
 
 /// StockPage Wrapper - BLoC 제공
 class StockPage extends StatelessWidget {
@@ -34,12 +35,22 @@ class _StockPageContent extends StatefulWidget {
 
 class _StockPageState extends State<_StockPageContent> {
   final TextEditingController _quantityController = TextEditingController();
+  final BgmService _bgmService = BgmService();
   bool _isBuyMode = true;
   bool _showChart = false;
 
   @override
+  void initState() {
+    super.initState();
+    // 주식 페이지 BGM 재생
+    _bgmService.play(BgmType.stock);
+  }
+
+  @override
   void dispose() {
     _quantityController.dispose();
+    // 홈 BGM으로 복귀
+    _bgmService.play(BgmType.home);
     super.dispose();
   }
 
